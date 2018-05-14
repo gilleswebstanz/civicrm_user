@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Contains civicrm_user.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function civicrm_user_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the civicrm_user module.
+    case 'help.page.civicrm_user':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to Drupal.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function civicrm_user_cron() {
+  /** @var \Drupal\civicrm_user\CiviCrmUserProcessor $userProcessor */
+  $userProcessor = \Drupal::service('civicrm_user.processor');
+  $userProcessor->prepareContactQueue();
+  $userProcessor->processContactQueue();
+}

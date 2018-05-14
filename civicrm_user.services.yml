@@ -1,0 +1,7 @@
+services:
+  civicrm_user.matcher:
+    class: Drupal\civicrm_user\CiviCrmUserMatcher
+    arguments: ['@civicrm_tools.api', '@entity_type.manager']
+  civicrm_user.processor:
+    class: Drupal\civicrm_user\CiviCrmUserQueue
+    arguments: ['@queue', '@cron', '@state', '@civicrm_user.matcher']
