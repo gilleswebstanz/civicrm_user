@@ -7,7 +7,7 @@ use Drupal\Core\CronInterface;
 use Drupal\Core\State\StateInterface;
 
 /**
- * Class CiviCrmUserQueue.
+ * Class CiviCrmUserProcessor.
  *
  * Processes User operations.
  */
@@ -55,18 +55,42 @@ class CiviCrmUserProcessor implements CiviCrmUserProcessorInterface {
    * {@inheritdoc}
    */
   public function prepareContactQueue() {
-    // Defaults to an hourly interval.
-    // Cron has to be running at least hourly for this to work.
-    // @todo configure interval in settings form
-    $interval = 3600;
-    // We usually don't want to act every time cron runs (which could be every
-    // minute) so keep a time for the next run in the site state.
-    $next_execution = $this->state->get('civicrm_user_cron.next_execution');
-    $next_execution = !empty($next_execution) ? $next_execution : 0;
-    if ((int) $_SERVER['REQUEST_TIME'] >= $next_execution) {
-      // @todo select and add contact item
-      \Drupal::logger('civicrm_user')->notice(t('CiviCRM user - prepare contact queue.'));
-      $this->state->set('civicrm_user_cron.next_execution', $_SERVER['REQUEST_TIME'] + $interval);
+    // @todo pseudo code to implement
+    // array contacts — get a list of all the contact id’s filtered
+    //
+    // array existingUserMatches — iterate through civicrm_uf_match
+    // table and store the pair uid - cid
+    //
+    // array usersToCreate - make a diff between contacts
+    // + existingUserMatches
+    //
+    // Then
+    // - check the matchStatus for all contacts in the existingUserMatches
+    // - create user accounts for usersToCreate.
+    $civiCrmMatchFilter = new CiviCrmMatchFilter();
+    $params = [];
+    $groups = $civiCrmMatchFilter->getGroups();
+    $params['group'] = [
+      'IN' => $groups,
+    ];
+    $tags = $civiCrmMatchFilter->getTags();
+    if (!empty($tags)) {
+      $params['tag'] = [
+        'IN' => $tags,
+      ];
+    }
+
+    /** @var \Drupal\civicrm_tools\CiviCrmApiInterface $api */
+    $api = \Drupal::service('civicrm_tools.api');
+    $count = $api->count('Contact', $params);
+
+    // If there is less than 1 page.
+    // @todo case to remove, used for debug only.
+    if ($count <= CiviCrmUserProcessorInterface::PAGE_ITEMS) {
+      $contacts = $api->getAll('Contact', $params);
+      foreach ($contacts as $contact) {
+        $this->addContactItem($contact);
+      }
     }
   }
 
@@ -111,7 +135,8 @@ class CiviCrmUserProcessor implements CiviCrmUserProcessorInterface {
    *   CiviCRM contact data.
    */
   private function processContactItem(array $contact) {
-    // TODO: Implement processContactItem() method.
+    // @todo execute in worker.
+    // $this->civicrmUserMatcher->matchUserState($contact, $filter);
   }
 
 }

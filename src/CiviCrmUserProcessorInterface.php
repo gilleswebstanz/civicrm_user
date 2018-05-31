@@ -7,6 +7,8 @@ namespace Drupal\civicrm_user;
  */
 interface CiviCrmUserProcessorInterface {
 
+  const PAGE_ITEMS = 25;
+
   /**
    * Enqueues the contacts to be checked for a match.
    */
