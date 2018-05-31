@@ -1,5 +1,5 @@
 
-civicrm_user.civicrm_user_settings_form:
+civicrm_user.settings_form:
   path: '/admin/config/civicrm_user/settings'
   defaults:
     _form: '\Drupal\civicrm_user\Form\SettingsForm'
@@ -9,3 +9,10 @@ civicrm_user.civicrm_user_settings_form:
   options:
     _admin_route: TRUE
 
+civicrm_user.test_controller:
+  path: '/civicrm_user/test'
+  defaults:
+    _controller: '\Drupal\civicrm_user\Controller\TestController::test'
+    _title: 'Test'
+  requirements:
+    _permission: 'access content'
