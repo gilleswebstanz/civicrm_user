@@ -1,6 +1,6 @@
 name: 'CiviCRM User'
 type: module
-description: 'Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to Drupal.'
+description: 'Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to the Drupal frontend.'
 core: 8.x
 package: 'CiviCRM'
 dependencies:

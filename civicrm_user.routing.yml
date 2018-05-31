@@ -5,6 +5,7 @@ civicrm_user.settings_form:
     _form: '\Drupal\civicrm_user\Form\SettingsForm'
     _title: 'CiviCRM User settings'
   requirements:
+    # @todo review permission
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE

@@ -75,6 +75,15 @@ class SettingsForm extends ConfigFormBase {
       $tagOptions[$tid] = $tag['name'];
     }
 
+    // @todo this value could be fetched from the civicrm.settings.php file
+    $form['domain_id'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Domain id'),
+      '#description' => $this->t('CiviCRM domain id. By default 1. Modify if multiple website instances of a frontend are accessing CiviCRM, this is the domain id that can be found in <em>civicrm.setting.php</em>.'),
+      '#min' => 1,
+      '#step' => 1,
+      '#default_value' => empty($config->get('domain_id')) ? 1 : $config->get('domain_id'),
+    ];
     $form['group'] = [
       '#type' => 'select',
       '#title' => $this->t('Group'),
@@ -110,6 +119,7 @@ class SettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $this->config('civicrm_user.settings')
+      ->set('domain_id', $form_state->getValue('domain_id'))
       ->set('group', $form_state->getValue('group'))
       ->set('tag', $form_state->getValue('tag'))
       ->save();

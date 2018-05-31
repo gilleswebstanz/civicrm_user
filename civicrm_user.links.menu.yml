@@ -1,6 +1,6 @@
 civicrm_user.settings_form:
   title: 'CiviCRM User'
   route_name: civicrm_user.settings_form
-  description: 'Limit Drupal users to selected CiviCRM Groups or Tags.'
+  description: 'Limit Drupal users to selected filters: Groups, Tags, domain id.'
   parent: user.admin_index
   weight: 99

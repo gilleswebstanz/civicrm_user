@@ -16,7 +16,7 @@ function civicrm_user_help($route_name, RouteMatchInterface $route_match) {
     case 'help.page.civicrm_user':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to Drupal.') . '</p>';
+      $output .= '<p>' . t('Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to the Drupal frontend.') . '</p>';
       return $output;
 
     default:
@@ -25,10 +25,25 @@ function civicrm_user_help($route_name, RouteMatchInterface $route_match) {
 
 /**
  * Implements hook_cron().
+ *
+ * Executes Contact to User operations.
  */
 function civicrm_user_cron() {
-  /** @var \Drupal\civicrm_user\CiviCrmUserProcessor $userProcessor */
-  $userProcessor = \Drupal::service('civicrm_user.processor');
-  $userProcessor->prepareContactQueue();
-  $userProcessor->processContactQueue();
+  // Defaults to an hourly interval.
+  // Cron has to be running at least hourly for this to work.
+  // @todo configure interval in settings form
+  $interval = 3600;
+  // We usually don't want to act every time cron runs (which could be every
+  // minute) so keep a time for the next run in the site state.
+  $next_execution = \Drupal::state()->get('civicrm_user_cron.next_execution');
+  $next_execution = !empty($next_execution) ? $next_execution : 0;
+  if ((int) $_SERVER['REQUEST_TIME'] >= $next_execution) {
+    // @todo separate preparation from processing.
+    /** @var \Drupal\civicrm_user\CiviCrmUserProcessor $userProcessor */
+    $userProcessor = \Drupal::service('civicrm_user.processor');
+    $userProcessor->prepareContactQueue();
+    $userProcessor->processContactQueue();
+    \Drupal::logger('civicrm_user')->notice(t('CiviCRM user cron ran.'));
+    \Drupal::state()->set('civicrm_user_cron.next_execution', $_SERVER['REQUEST_TIME'] + $interval);
+  }
 }

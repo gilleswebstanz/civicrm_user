@@ -1,7 +1,7 @@
 {
   "name": "drupal/civicrm_user",
   "type": "drupal-module",
-  "description": "Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to Drupal.",
+  "description": "Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to the Drupal frontend.",
   "keywords": ["Drupal"],
   "license": "GPL-2.0+",
   "homepage": "https://www.drupal.org/project/civicrm_user",
