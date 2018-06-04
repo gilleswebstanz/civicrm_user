@@ -75,7 +75,14 @@ class SettingsForm extends ConfigFormBase {
       $tagOptions[$tid] = $tag['name'];
     }
 
+    $contactValueOptions = [
+      'email' => 'Email',
+      'display_name' => 'Display name (e.g. Ms Jane DOE)',
+      'first_and_last_name' => 'First and last name (e.g. Jane DOE)',
+    ];
+
     // @todo this value could be fetched from the civicrm.settings.php file
+    // @todo group filters in a fieldset
     $form['domain_id'] = [
       '#type' => 'number',
       '#title' => $this->t('Domain id'),
@@ -102,6 +109,14 @@ class SettingsForm extends ConfigFormBase {
       '#size' => 5,
       '#default_value' => $config->get('tag'),
     ];
+
+    $form['username'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Username'),
+      '#description' => $this->t('The Drupal username will be set from this CiviCRM contact value.'),
+      '#options' => $contactValueOptions,
+      '#default_value' => $config->get('username'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -122,6 +137,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('domain_id', $form_state->getValue('domain_id'))
       ->set('group', $form_state->getValue('group'))
       ->set('tag', $form_state->getValue('tag'))
+      ->set('username', $form_state->getValue('username'))
       ->save();
   }
 

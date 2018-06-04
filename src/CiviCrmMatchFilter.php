@@ -19,12 +19,12 @@ class CiviCrmMatchFilter {
    * Constructs a new CiviCrmMatchFilter object.
    */
   public function __construct() {
-    /** @var ConfigFactoryInterface $config */
+    /** @var \Drupal\Core\Config\ConfigFactoryInterface $config */
     $config = \Drupal::configFactory()->get('civicrm_user.settings');
     // The domain id is the only mandatory filter.
     $this->domainId = $config->get('domain_id');
-    $this->groups = $config->get('groups');
-    $this->tags = $config->get('tags');
+    $this->groups = $config->get('group');
+    $this->tags = $config->get('tag');
   }
 
   /**
