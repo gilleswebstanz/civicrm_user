@@ -10,12 +10,23 @@ use Drupal\user\Entity\User;
 interface CiviCrmUserMatcherInterface {
 
   /**
-   * Returns a list of matches containing the user id and contact id.
+   * Returns a list of existing contact - user matches.
    *
    * @return array
    *   List of matches.
    */
-  public function getMatches(): array;
+  public function getExistingMatches(): array;
+
+  /**
+   * Returns a list of contacts filtered by the match conditions.
+   *
+   * Get contacts filtered by groups, tags, domain_id that are the
+   * candidates for a user match.
+   *
+   * @return array
+   *   List of matches.
+   */
+  public function getCandidateMatches(): array;
 
   /**
    * Returns a CiviCRM contact from a user id.
@@ -26,16 +37,5 @@ interface CiviCrmUserMatcherInterface {
    * Returns a CiviCRM user from a contact id.
    */
   public function getUserMatch($contact): User;
-
-  /**
-   * Matches the state of a User based on a CiviCRM Contact.
-   *
-   * When the User does not match the criterion defined by the filter,
-   * its status in Drupal becomes inactive (blocked).
-   *
-   * @param array $contact
-   *   The CiviCRM Contact data.
-   */
-  public function matchUserState(array $contact);
 
 }
