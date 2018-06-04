@@ -81,6 +81,14 @@ class SettingsForm extends ConfigFormBase {
       'first_and_last_name' => 'First and last name (e.g. Jane DOE)',
     ];
 
+    $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple();
+    unset($roles['anonymous']);
+    unset($roles['authenticated']);
+    $roleOptions = [];
+    foreach ($roles as $key => $role) {
+      $roleOptions[$key] = $role->label();
+    }
+
     // @todo this value could be fetched from the civicrm.settings.php file
     // @todo group filters in a fieldset
     $form['domain_id'] = [
@@ -110,6 +118,7 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('tag'),
     ];
 
+    // @todo group user default values in a fieldset
     $form['username'] = [
       '#type' => 'select',
       '#title' => $this->t('Username'),
@@ -117,14 +126,16 @@ class SettingsForm extends ConfigFormBase {
       '#options' => $contactValueOptions,
       '#default_value' => $config->get('username'),
     ];
+    $form['role'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Role'),
+      '#description' => $this->t('Role(s) to assign to the newly created user.'),
+      '#options' => $roleOptions,
+      '#multiple' => TRUE,
+      '#size' => 5,
+      '#default_value' => $config->get('role'),
+    ];
     return parent::buildForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
   }
 
   /**
@@ -138,6 +149,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('group', $form_state->getValue('group'))
       ->set('tag', $form_state->getValue('tag'))
       ->set('username', $form_state->getValue('username'))
+      ->set('role', $form_state->getValue('role'))
       ->save();
   }
 
