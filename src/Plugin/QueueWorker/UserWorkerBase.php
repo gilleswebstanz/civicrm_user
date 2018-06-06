@@ -2,6 +2,7 @@
 
 namespace Drupal\civicrm_user\Plugin\QueueWorker;
 
+use Drupal\civicrm_user\CiviCrmUserQueueItem;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -76,21 +77,24 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
    *   The $item which was stored in the cron queue.
    */
   protected function reportWork($worker, $item) {
-    // @todo set status message
-    if ($this->state->get('civicrm_user_show_status_message')) {
-      $this->messenger()->addMessage(
-        $this->t('Queue @worker worker processed item with sequence @sequence created at @time', [
-          '@worker' => $worker,
-          '@sequence' => $item->sequence,
-          '@time' => date_iso8601($item->created),
-        ])
-      );
+    // @todo set status message state
+    if($item instanceof CiviCrmUserQueueItem) {
+      if ($this->state->get('civicrm_user_show_status_message')) {
+        $this->messenger()->addMessage(
+          $this->t('Queue @worker worker processed item for contact id @id.', [
+            '@worker' => $worker,
+            '@id' => $item->getContactId(),
+          ])
+        );
+      }
+      $this->logger->get('civicrm_user')->info('Queue @worker worker processed item contact id @id.', [
+        '@worker' => $worker,
+        '@name' => $item->getContactId(),
+      ]);
+    }else {
+      // @todo be more verbose.
+      $this->logger->get('civicrm_user')->error('Worker @worker cannot process item.');
     }
-    $this->logger->get('civicrm_user')->info('Queue @worker worker processed item with sequence @sequence created at @time', [
-      '@worker' => $worker,
-      '@sequence' => $item->sequence,
-      '@time' => date_iso8601($item->created),
-    ]);
   }
 
 }

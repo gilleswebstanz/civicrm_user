@@ -14,10 +14,10 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
   /**
    * {@inheritdoc}
    */
-  public function processItem($data) {
-    if ($data instanceof CiviCrmUserQueueItem) {
-      $this->createUser($data->getContact());
-      $this->reportWork(get_class(), $data);
+  public function processItem($item) {
+    if ($item instanceof CiviCrmUserQueueItem) {
+      $this->createUser($item->getContact());
+      $this->reportWork(get_class(), $item);
     }
   }
 

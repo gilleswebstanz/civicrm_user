@@ -54,6 +54,10 @@ class CiviCrmUserMatcher implements CiviCrmUserMatcherInterface {
     $result = [];
     // @todo throw exception if domain id is not set
     // @todo make use of match filter while selecting matches.
+    // @todo it should make sense to always return a civicrm contact,
+    // this will allow to simplifiy CiviCrmUserQueueItem constructor
+    // and is way more predictable.
+
     // Get a connection to the CiviCRM database.
     Database::setActiveConnection('civicrm');
     $db = Database::getConnection();

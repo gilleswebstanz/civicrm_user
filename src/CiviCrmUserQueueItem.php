@@ -77,4 +77,14 @@ class CiviCrmUserQueueItem {
     return $this->contact;
   }
 
+  /**
+   * Returns a common identifier for the contact or contact match.
+   *
+   * @return int
+   *   Identifier of the contact.
+   */
+  public function getContactId(): string {
+    return (int) $this->contact['contact_id'];
+  }
+
 }
