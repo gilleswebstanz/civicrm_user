@@ -62,6 +62,7 @@ class SettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('civicrm_user.settings');
+    $this->displayWork();
 
     $groups = $this->civicrmToolsApi->getAll('Group', []);
     $groupOptions = [];
@@ -151,6 +152,29 @@ class SettingsForm extends ConfigFormBase {
       ->set('username', $form_state->getValue('username'))
       ->set('role', $form_state->getValue('role'))
       ->save();
+  }
+
+  /**
+   * Display what needs to be processed by workers based on the configuration.
+   */
+  private function displayWork() {
+    /** @var \Drupal\civicrm_user\CiviCrmUserMatcherInterface $matcher */
+    $matcher = \Drupal::service('civicrm_user.matcher');
+    $existingMatches = $matcher->getExistingMatches();
+    $candidateMatches = $matcher->getCandidateMatches();
+
+    // Users that are not in the existing matches.
+    $usersToCreate = array_diff_key($candidateMatches, $existingMatches);
+    // Existing matches that are not candidates for a user account anymore.
+    $usersToBlock = array_diff_key($existingMatches, $candidateMatches);
+    // Update and unblock all other existing matches.
+    $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
+
+    $this->messenger()->addWarning($this->t('Users to create: @number_create, to update: @number_update, to block: @number_block.', [
+      '@number_create' => count($usersToCreate),
+      '@number_update' => count($usersToUpdate),
+      '@number_block' => count($usersToBlock),
+    ]));
   }
 
 }
