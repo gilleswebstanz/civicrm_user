@@ -1,0 +1,7 @@
+administer civicrm user:
+  title: Administer CiviCRM User
+  description: Configure CiviCRM User mapping conditions and default values.
+
+use civicrm user:
+  title: Use CiviCRM User
+  description:  Create and process the contact to user queue.

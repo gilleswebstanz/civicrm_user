@@ -2,9 +2,28 @@ civicrm_user.settings_form:
   path: '/admin/config/civicrm_user/settings'
   defaults:
     _form: '\Drupal\civicrm_user\Form\SettingsForm'
-    _title: 'CiviCRM User settings'
+    _title: 'CiviCRM User configuration'
   requirements:
-    # @todo review permission
-    _permission: 'access administration pages'
+    _permission: 'administer civicrm user'
+  options:
+    _admin_route: TRUE
+
+civicrm_user.create_queue_form:
+  path: '/admin/civicrm_user/create-queue'
+  defaults:
+    _form: '\Drupal\civicrm_user\Form\CreateQueueForm'
+    _title: 'Creates the CivCRM contact to user queue'
+  requirements:
+    _permission: 'use civicrm user'
+  options:
+    _admin_route: TRUE
+
+civicrm_user.process_queue_form:
+  path: '/admin/civicrm_user/process-queue'
+  defaults:
+    _form: '\Drupal\civicrm_user\Form\ProcessQueueForm'
+    _title: 'Processes the CivCRM contact to user queue'
+  requirements:
+    _permission: 'use civicrm user'
   options:
     _admin_route: TRUE

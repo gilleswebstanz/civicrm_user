@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\civicrm_user\CiviCrmUserQueueCreatorInterface;
 
 /**
  * Implements hook_help().
@@ -38,11 +39,15 @@ function civicrm_user_cron() {
   $next_execution = \Drupal::state()->get('civicrm_user_cron.next_execution');
   $next_execution = !empty($next_execution) ? $next_execution : 0;
   if ((int) $_SERVER['REQUEST_TIME'] >= $next_execution) {
-    // @todo separate preparation from processing.
-    /** @var \Drupal\civicrm_user\CiviCrmUserProcessor $userProcessor */
-    $userProcessor = \Drupal::service('civicrm_user.processor');
-    $userProcessor->prepareContactQueue();
-    $userProcessor->processContactQueue();
+    // @todo check if manual/cron queue is not running (create helper)
+    /* @var \Drupal\civicrm_user\CiviCrmUserQueueCreatorInterface  $creator */
+    $creator = \Drupal::service('civicrm_user.creator');
+    $creator->addItems(CiviCrmUserQueueCreatorInterface::QUEUE_CRON);
+
+    /* @var \Drupal\civicrm_user\CiviCrmUserQueueProcessorInterface  $processor */
+    $processor = \Drupal::service('civicrm_user.processor');
+    $processor->processItems(CiviCrmUserQueueCreatorInterface::QUEUE_CRON);
+
     \Drupal::logger('civicrm_user')->notice(t('CiviCRM user cron ran.'));
     \Drupal::state()->set('civicrm_user_cron.next_execution', $_SERVER['REQUEST_TIME'] + $interval);
   }

@@ -2,25 +2,21 @@
 
 namespace Drupal\civicrm_user\Plugin\QueueWorker;
 
-use Drupal\Core\State\StateInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Messenger\MessengerTrait;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
+use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 
 /**
- * A contact to user worker.
- *
- * @QueueWorker(
- *   id = "civicrm_contact_queue",
- *   title = @Translation("Contact worker"),
- *   cron = {"time" = 1}
- * )
+ * Provides base functionality for the UserWorkers.
  */
-class ContactWorker extends QueueWorkerBase implements ContainerFactoryPluginInterface {
+abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
+  use MessengerTrait;
 
   /**
    * The state.
@@ -37,7 +33,7 @@ class ContactWorker extends QueueWorkerBase implements ContainerFactoryPluginInt
   protected $logger;
 
   /**
-   * ReportWorkerBase constructor.
+   * UserWorkerBase constructor.
    *
    * @param array $configuration
    *   The configuration of the instance.
@@ -60,37 +56,41 @@ class ContactWorker extends QueueWorkerBase implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
+    $form = new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->get('state'),
       $container->get('logger.factory')
     );
+    $form->setMessenger($container->get('messenger'));
+    return $form;
   }
 
   /**
-   * Processes a contact.
+   * Simple reporter log and display information about the queue.
    *
-   * @param int $worker
-   *   Worker number.
+   * @param string $worker
+   *   Worker operation.
    * @param object $item
    *   The $item which was stored in the cron queue.
    */
-  protected function processContact($worker, $item) {
-    // @todo implement
+  protected function reportWork($worker, $item) {
+    // @todo set status message
+    if ($this->state->get('civicrm_user_show_status_message')) {
+      $this->messenger()->addMessage(
+        $this->t('Queue @worker worker processed item with sequence @sequence created at @time', [
+          '@worker' => $worker,
+          '@sequence' => $item->sequence,
+          '@time' => date_iso8601($item->created),
+        ])
+      );
+    }
     $this->logger->get('civicrm_user')->info('Queue @worker worker processed item with sequence @sequence created at @time', [
       '@worker' => $worker,
       '@sequence' => $item->sequence,
       '@time' => date_iso8601($item->created),
     ]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function processItem($data) {
-    $this->processContact(1, $data);
   }
 
 }

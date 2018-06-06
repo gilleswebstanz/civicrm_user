@@ -30,11 +30,17 @@ interface CiviCrmUserMatcherInterface {
 
   /**
    * Returns a CiviCRM contact from a user id.
+   *
+   * @return array
+   *   The CivCRM contact that matches the Drupal user.
    */
   public function getContactMatch($user_id): array;
 
   /**
-   * Returns a CiviCRM user from a contact id.
+   * Returns a Drupal user from a contact id.
+   *
+   * @return \Drupal\user\Entity\User
+   *   The Drupal user that matches the CiviCRM contact.
    */
   public function getUserMatch($contact): User;
 

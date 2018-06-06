@@ -2,6 +2,9 @@ services:
   civicrm_user.matcher:
     class: Drupal\civicrm_user\CiviCrmUserMatcher
     arguments: ['@civicrm_tools.api', '@entity_type.manager']
+  civicrm_user.creator:
+      class: Drupal\civicrm_user\CiviCrmUserQueueCreator
+      arguments: ['@queue', '@civicrm_user.matcher', '@state']
   civicrm_user.processor:
-    class: Drupal\civicrm_user\CiviCrmUserProcessor
-    arguments: ['@queue', '@cron', '@state', '@civicrm_user.matcher']
+    class: Drupal\civicrm_user\CiviCrmUserQueueProcessor
+    arguments: ['@queue', '@plugin.manager.queue_worker', '@state']

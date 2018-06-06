@@ -1,6 +1,21 @@
 civicrm_user.settings_form:
-  title: 'CiviCRM User'
+  title: 'CiviCRM User configuration'
   route_name: civicrm_user.settings_form
-  description: 'Limit Drupal users to selected filters: Groups, Tags, domain id.'
+  description: 'Limit Drupal users with CiviCRM filters (Groups, Tags, domain id) and set users default properties.'
+  parent: user.admin_index
+  weight: 99
+
+# @todo provide as menu local tasks
+civicrm_user.create_queue_form:
+  title: 'CiviCRM User queue creation'
+  route_name: civicrm_user.create_queue_form
+  description: 'Creates the CivCRM contact to user queue'
+  parent: user.admin_index
+  weight: 99
+
+civicrm_user.process_queue_form:
+  title: 'CiviCRM User queue processing'
+  route_name: civicrm_user.process_queue_form
+  description: 'Processes the CivCRM contact to user queue'
   parent: user.admin_index
   weight: 99
