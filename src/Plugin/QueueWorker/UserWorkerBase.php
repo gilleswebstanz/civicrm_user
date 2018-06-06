@@ -89,11 +89,13 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
       }
       $this->logger->get('civicrm_user')->info('Queue @worker worker processed item contact id @id.', [
         '@worker' => $worker,
-        '@name' => $item->getContactId(),
+        '@id' => $item->getContactId(),
       ]);
     }else {
       // @todo be more verbose.
-      $this->logger->get('civicrm_user')->error('Worker @worker cannot process item.');
+      $this->logger->get('civicrm_user')->error('Worker @worker cannot process item.', [
+        '@worker' => $worker,
+      ]);
     }
   }
 
