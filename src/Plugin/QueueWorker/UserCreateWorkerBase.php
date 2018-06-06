@@ -63,6 +63,12 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
       catch (EntityStorageException $exception) {
         \Drupal::messenger()->addError($exception->getMessage());
       }
+    }else {
+      // This may be a contact from CiviCRM that shares the same email address.
+      // The update queue will take care of updating these ones.
+      \Drupal::messenger()->addWarning(t('Tried to create an existing user: @username', [
+        '@username' => $this->getUsername($contact),
+      ]));
     }
     return $result;
   }
@@ -103,7 +109,6 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
    *   The formatted username.
    */
   private function getUsername(array $contact) {
-    // @todo dependency injection
     $result = '';
     $config = \Drupal::configFactory()->get('civicrm_user.settings');
     switch ($config->get('username')) {
