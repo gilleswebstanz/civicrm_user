@@ -1,42 +1,51 @@
 # CiviCRM User
 
-Operations on Drupal User entities based on a CiviCRM data source.
+Operations on Drupal _User_ entities based on a CiviCRM _Contact_ data source.
 Useful when the process of creating users is not delegated to Drupal
-(existing CiviCRM Contacts, frontend User registration disabled, ...).
+(existing CiviCRM contacts, frontend user registration disabled, ...).
 
-Creates, updates or blocks Drupal Users from CiviCRM Contacts.
+Creates, updates or blocks Drupal users from CiviCRM contacts.
 
-These operations are optionally based on a condition that can be
-- a CiviCRM Tag applied to the Contact (e.g. "Has a Drupal user account")
-- a CiviCRM Group (e.g. when a Contact belongs to a Group).
+These operations are based on filters:
+- The CiviCRM domain id for the Drupal site
+- 0 to multiple CiviCRM _Tags_ applied to the contact 
+(e.g. "Has a Drupal user account")
+- 0 to multiple CiviCRM _Groups_ (e.g. when a Contact belongs to Groups).
 
-Conditions are recommended because CiviCRM allows several Contacts
+Filters are recommended because CiviCRM allows several contacts
 to share the same email address, which is not the case (by default)
 on Drupal.
 
-When such conditions are met, adding or removing them triggers
-the Drupal User operations.
-
 Examples:
 
-- Create CiviCRM Contact and assign a Tag: 
-creates the Drupal User if it does not exist
-or unblock it if it exists.
-- Remove a Tag from a Contact:
-blocks the Drupal User.
+- Create or update a CiviCRM contact and assign a tag: 
+creates the Drupal user if it does not exist
+or unblock and update it if it exists.
+- Remove a tag from a contact:
+blocks the Drupal user.
 
-On Drupal 7, this was [delegated to Rules and CiviCRM Entity](https://wiki.civicrm.org/confluence/display/CRMDOC/Creating+a+Drupal+user+for+every+CiviCRM+contact).
+The operations are processed by a queue that can be created
+manually or via a cron.
+
+On Drupal 7, this use case was 
+[delegated to Rules and CiviCRM Entity](https://wiki.civicrm.org/confluence/display/CRMDOC/Creating+a+Drupal+user+for+every+CiviCRM+contact).
 At the time of writing, [CiviCRM Entity](https://www.drupal.org/project/civicrm_entity)
 and [Rules](https://www.drupal.org/project/rules) for Drupal 8
-do not cover this use case yet.
+do not cover the use case yet.
 
 Further releases could just delegate to these modules.
 
 ## Roadmap
 
-- Create User
-- Update User
-- Block User
-- Set condition from the Drupal module configuration
-- If a User is created under Drupal, reflect the condition in CiviCRM
-- Logging of email addresses used for several Contacts that share the condition.
+- Set filters from the Drupal module configuration
+- Create user
+- Update user
+- Block user
+- Process queue manually
+- Process queue with cron
+- If a user is created under Drupal, reflect the condition in CiviCRM
+(assign the tags or groups)
+- Review a way to trigger the operations on a user by adding or 
+removing a CiviCRM tag or group
+- Logging of email addresses used for several contacts 
+that are sharing the filters.
