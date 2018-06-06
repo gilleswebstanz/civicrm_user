@@ -16,7 +16,7 @@ abstract class UserBlockWorkerBase extends UserWorkerBase {
    */
   public function processItem($data) {
     if ($data instanceof CiviCrmUserQueueItem) {
-      // $this->blockUser($data->getContact()['uid']);
+      $this->blockUser($data->getContact()['uid']);
       $this->reportWork(get_class(), $data);
     }
   }

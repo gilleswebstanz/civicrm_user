@@ -16,8 +16,8 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
   public function processItem($data) {
     if ($data instanceof CiviCrmUserQueueItem) {
       // @todo merge two operations as they both need the user to be saved.
-      // $this->unblockUser($data->getContact());
-      // $this->updateUser($data->getContact());
+      $this->unblockUser($data->getContact());
+      $this->updateUser($data->getContact());
       $this->reportWork(get_class(), $data);
     }
   }

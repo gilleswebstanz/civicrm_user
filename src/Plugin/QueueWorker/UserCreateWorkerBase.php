@@ -16,7 +16,7 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
    */
   public function processItem($data) {
     if ($data instanceof CiviCrmUserQueueItem) {
-      // $this->createUser($data->getContact());
+      $this->createUser($data->getContact());
       $this->reportWork(get_class(), $data);
     }
   }

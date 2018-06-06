@@ -69,7 +69,7 @@ class CreateQueueForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // @todo add link to process queue form
     $numberOfItems = $this->queueCreator->addItems(CiviCrmUserQueueItem::QUEUE_TYPE_MANUAL);
-    $this->messenger()->addMessage($this->t('Added @number_of_items items to the manual queue.', ['number_of_items' => $numberOfItems]));
+    $this->messenger()->addMessage($this->t('Added @number_of_items items to the manual queue.', ['@number_of_items' => $numberOfItems]));
   }
 
 }

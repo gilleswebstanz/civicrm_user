@@ -69,16 +69,16 @@ class CiviCrmUserQueueCreator implements CiviCrmUserQueueCreatorInterface {
     $usersToBlock = array_diff_key($existingMatches, $candidateMatches);
     foreach ($usersToBlock as $contactMatch) {
       $item = new CiviCrmUserQueueItem(CiviCrmUserQueueItem::OPERATION_BLOCK, $contactMatch);
-      $blockQueue->createItem($item);
-      $result++;
+      //$blockQueue->createItem($item);
+      //$result++;
     }
 
     // Update and unblock all other existing matches.
     $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
     foreach ($usersToUpdate as $contact) {
       $item = new CiviCrmUserQueueItem(CiviCrmUserQueueItem::OPERATION_UPDATE, $contact);
-      $updateQueue->createItem($item);
-      $result++;
+      //$updateQueue->createItem($item);
+      //$result++;
     }
 
     return $result;
