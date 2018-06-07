@@ -43,43 +43,58 @@ class CiviCrmUserQueueCreator implements CiviCrmUserQueueCreatorInterface {
   }
 
   /**
+   * Add items for a queue type for each worker (operation).
+   *
+   * @param string $queue_type
+   *   Manual or cron queue.
+   * @param array $contacts
+   *   List of CiviCRM contacts.
+   * @param string $operation
+   *   Operation to apply on Drupal users.
+   *
+   * @return int
+   *   Number of items that were added to the queue.
+   */
+  private function addItemsForOperation($queue_type, array $contacts, $operation): int {
+    $result = 0;
+    $config = \Drupal::configFactory()->get('civicrm_user.settings');
+    $configuredOperations = $config->get('operation');
+    if (isset($configuredOperations[$operation]) &&
+      $configuredOperations[$operation] === $operation) {
+      // @todo verify if use state is needed to check if the manual or cron queues are running
+      // Create a queue for every worker.
+      $queue = $this->queueFactory->get(CiviCrmUserQueueItem::getQueuesByType($queue_type)[$operation]);
+      foreach ($contacts as $contact) {
+        // @todo contact is a contactMatch for the 'block' operation, which is ambiguous
+        $item = new CiviCrmUserQueueItem($operation, $contact);
+        $queue->createItem($item);
+        $result++;
+      }
+    }
+    return $result;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function addItems($queue_type) : int {
     $result = 0;
-    // @todo verify if use state is needed to check if the manual or cron queues are running
-    // Create a queue for every worker.
-    $createQueue = $this->queueFactory->get(CiviCrmUserQueueItem::getQueuesByType($queue_type)[CiviCrmUserQueueItem::OPERATION_CREATE]);
-    $blockQueue = $this->queueFactory->get(CiviCrmUserQueueItem::getQueuesByType($queue_type)[CiviCrmUserQueueItem::OPERATION_BLOCK]);
-    $updateQueue = $this->queueFactory->get(CiviCrmUserQueueItem::getQueuesByType($queue_type)[CiviCrmUserQueueItem::OPERATION_UPDATE]);
 
     $existingMatches = $this->matcher->getExistingMatches();
     $candidateMatches = $this->matcher->getCandidateMatches();
 
     // Create users that are not in the existing matches.
     $usersToCreate = array_diff_key($candidateMatches, $existingMatches);
-    foreach ($usersToCreate as $contact) {
-      $item = new CiviCrmUserQueueItem(CiviCrmUserQueueItem::OPERATION_CREATE, $contact);
-      $createQueue->createItem($item);
-      $result++;
-    }
+    $result += $this->addItemsForOperation($queue_type, $usersToCreate, CiviCrmUserQueueItem::OPERATION_CREATE);
 
     // Block existing matches that are not candidates
     // for a user account anymore.
     $usersToBlock = array_diff_key($existingMatches, $candidateMatches);
-    foreach ($usersToBlock as $contactMatch) {
-      $item = new CiviCrmUserQueueItem(CiviCrmUserQueueItem::OPERATION_BLOCK, $contactMatch);
-      //$blockQueue->createItem($item);
-      //$result++;
-    }
+    $result += $this->addItemsForOperation($queue_type, $usersToBlock, CiviCrmUserQueueItem::OPERATION_BLOCK);
 
     // Update and unblock all other existing matches.
     $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
-    foreach ($usersToUpdate as $contact) {
-      $item = new CiviCrmUserQueueItem(CiviCrmUserQueueItem::OPERATION_UPDATE, $contact);
-      //$updateQueue->createItem($item);
-      //$result++;
-    }
+    $result += $this->addItemsForOperation($queue_type, $usersToUpdate, CiviCrmUserQueueItem::OPERATION_UPDATE);
 
     return $result;
   }

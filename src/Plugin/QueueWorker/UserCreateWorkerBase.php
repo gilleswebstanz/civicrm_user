@@ -2,9 +2,12 @@
 
 namespace Drupal\civicrm_user\Plugin\QueueWorker;
 
+use Drupal\civicrm_user\CiviCrmMatchFilter;
 use Drupal\civicrm_user\CiviCrmUserQueueItem;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\EntityStorageException;
+use Drupal\user\Entity\User;
 
 /**
  * Provides base functionality for the user create workers.
@@ -63,7 +66,10 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
       catch (EntityStorageException $exception) {
         \Drupal::messenger()->addError($exception->getMessage());
       }
-    }else {
+
+      $this->setContactMatch($user, $contact);
+    }
+    else {
       // This may be a contact from CiviCRM that shares the same email address.
       // The update queue will take care of updating these ones.
       \Drupal::messenger()->addWarning(t('Tried to create an existing user: @username', [
@@ -128,6 +134,80 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
         break;
     }
     return $result;
+  }
+
+  /**
+   * Create or update the contact match.
+   *
+   * CiviCRM is not always finding the right match
+   * and creates a new contact in that case.
+   *
+   * @param \Drupal\user\Entity\User $user
+   *   Drupal user entity.
+   * @param array $contact
+   *   CiviCRM contact entity.
+   */
+  private function setContactMatch(User $user, array $contact) {
+    // Get the domain id.
+    $matchFilter = new CiviCrmMatchFilter();
+    $domainId = $matchFilter->getDomainId();
+
+    $matchTable = 'civicrm_uf_match';
+
+    // Get a connection to the CiviCRM database.
+    Database::setActiveConnection('civicrm');
+    $db = Database::getConnection();
+
+    // Check first if the contact match exists.
+    // $selectQuery = $db->select($matchTable, 'match')
+    // ->fields('match', ['uf_id']);
+    // $selectQuery
+    // ->condition('domain_id', $domainId)
+    // ->condition('contact_id', $contact['contact_id']);
+    // $queryResult = $selectQuery->countQuery()->execute()->fetchField();
+    // @todo check possible security issue here
+    $query = $db->query("SELECT uf_id FROM {$matchTable} WHERE domain_id = :domain_id AND contact_id = :contact_id", [
+      ':domain_id' => $matchFilter->getDomainId(),
+      ':contact_id' => $contact['contact_id'],
+    ]);
+    $queryResult = $query->fetchField();
+
+    \Drupal::messenger()->addWarning('Contact match found for contact id ' . $contact['contact_id'] . '? User id ' . $queryResult);
+
+    // If so, update it.
+    if ($queryResult) {
+      \Drupal::messenger()->addWarning('Updating');
+      $db->update($matchTable)
+        ->fields([
+          'uf_id' => $user->id(),
+          'uf_name' => $user->getUsername(),
+        ])
+        ->condition('domain_id', $domainId)
+        ->condition('contact_id', $contact['contact_id'])
+        ->execute();
+      // Otherwise insert it.
+    }
+    else {
+      \Drupal::messenger()->addWarning('Creating');
+      try {
+        $db->insert($matchTable)
+          ->fields(
+            [
+              'domain_id' => $domainId,
+              'uf_id' => $user->id(),
+              'uf_name' => $user->getUsername(),
+              'contact_id' => $contact['contact_id'],
+            ]
+          )
+          ->execute();
+      }
+      catch (\Exception $exception) {
+        // @todo logger
+        \Drupal::messenger()->addError($exception->getMessage());
+      }
+    }
+    // Switch back to the default database.
+    Database::setActiveConnection();
   }
 
 }

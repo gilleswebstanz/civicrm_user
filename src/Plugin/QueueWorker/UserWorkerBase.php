@@ -78,7 +78,7 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
    */
   protected function reportWork($worker, $item) {
     // @todo set status message state
-    if($item instanceof CiviCrmUserQueueItem) {
+    if ($item instanceof CiviCrmUserQueueItem) {
       if ($this->state->get('civicrm_user_show_status_message')) {
         $this->messenger()->addMessage(
           $this->t('Queue @worker worker processed item for contact id @id.', [
@@ -91,7 +91,8 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
         '@worker' => $worker,
         '@id' => $item->getContactId(),
       ]);
-    }else {
+    }
+    else {
       // @todo be more verbose.
       $this->logger->get('civicrm_user')->error('Worker @worker cannot process item.', [
         '@worker' => $worker,

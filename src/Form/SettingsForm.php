@@ -2,6 +2,7 @@
 
 namespace Drupal\civicrm_user\Form;
 
+use Drupal\civicrm_user\CiviCrmUserQueueItem;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -136,6 +137,22 @@ class SettingsForm extends ConfigFormBase {
       '#size' => 5,
       '#default_value' => $config->get('role'),
     ];
+
+    // @todo group operation in a fieldset
+    // @todo this choice should probably not be exposed to all users
+    // its sole usage is to update before creating to cover use cases such
+    // as existing users that have evolved without keeping a sync with contacts.
+    $form['operation'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Operation'),
+      '#description' => $this->t('Operation(s) to run on Drupal users.'),
+      '#options' => [
+        CiviCrmUserQueueItem::OPERATION_CREATE => t('Create'),
+        CiviCrmUserQueueItem::OPERATION_UPDATE => t('Update'),
+        CiviCrmUserQueueItem::OPERATION_BLOCK => t('Block'),
+      ],
+      '#default_value' => $config->get('operation'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -151,6 +168,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('tag', $form_state->getValue('tag'))
       ->set('username', $form_state->getValue('username'))
       ->set('role', $form_state->getValue('role'))
+      ->set('operation', $form_state->getValue('operation'))
       ->save();
   }
 

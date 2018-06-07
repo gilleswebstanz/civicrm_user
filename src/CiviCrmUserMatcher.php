@@ -57,7 +57,6 @@ class CiviCrmUserMatcher implements CiviCrmUserMatcherInterface {
     // @todo it should make sense to always return a civicrm contact,
     // this will allow to simplifiy CiviCrmUserQueueItem constructor
     // and is way more predictable.
-
     // Get a connection to the CiviCRM database.
     Database::setActiveConnection('civicrm');
     $db = Database::getConnection();
