@@ -20,10 +20,34 @@ class QueuePreviewController extends ControllerBase {
   protected $matcher;
 
   /**
+   * Array of errors by operation.
+   *
+   * @var array
+   */
+  private $errors;
+
+  /**
+   * Array of changes by operation.
+   *
+   * @var array
+   */
+  private $changes;
+
+  /**
    * Constructs a new QueuePreviewController object.
    */
   public function __construct(CiviCrmUserMatcherInterface $matcher) {
     $this->matcher = $matcher;
+    $this->errors = [
+      CiviCrmUserQueueItem::OPERATION_CREATE => 0,
+      CiviCrmUserQueueItem::OPERATION_UPDATE => 0,
+      CiviCrmUserQueueItem::OPERATION_BLOCK => 0,
+    ];
+    $this->changes = [
+      CiviCrmUserQueueItem::OPERATION_CREATE => 0,
+      CiviCrmUserQueueItem::OPERATION_UPDATE => 0,
+      CiviCrmUserQueueItem::OPERATION_BLOCK => 0,
+    ];
   }
 
   /**
@@ -56,29 +80,26 @@ class QueuePreviewController extends ControllerBase {
         'class' => [RESPONSIVE_PRIORITY_MEDIUM],
       ],
     ];
-    // Check if user exists with mail and/or name.
-    if ($operation === CiviCrmUserQueueItem::OPERATION_CREATE) {
-      $header['drupal_status'] = [
-        'data' => $this->t('Drupal status'),
-        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
-      ];
-    }
     // Match data are not available on create.
     if ($operation === CiviCrmUserQueueItem::OPERATION_UPDATE
       || $operation === CiviCrmUserQueueItem::OPERATION_UPDATE) {
       $header['drupal_id'] = [
         'data' => $this->t('Drupal id'),
-        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+        'class' => [RESPONSIVE_PRIORITY_LOW],
       ];
       $header['drupal_name'] = [
         'data' => $this->t('Drupal name'),
-        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+        'class' => [RESPONSIVE_PRIORITY_LOW],
       ];
       $header['drupal_email'] = [
         'data' => $this->t('Drupal email'),
-        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+        'class' => [RESPONSIVE_PRIORITY_LOW],
       ];
     }
+    $header['drupal_status'] = [
+      'data' => $this->t('Drupal status'),
+      'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+    ];
     return $header;
   }
 
@@ -97,14 +118,23 @@ class QueuePreviewController extends ControllerBase {
       'contact_name' => $contact['sort_name'],
       'contact_email' => $contact['email'],
     ];
+    // @todo errors and changes can be simplified.
     // Check if user exists with mail and/or name.
     if ($operation === CiviCrmUserQueueItem::OPERATION_CREATE) {
-      $drupalStatus = 'Ok';
       if ($this->matcher->userExists($this->getUsername($contact), $contact['email'])) {
-        $drupalStatus = '** Exists **';
+        $result['drupal_status'] = '** Exists **';
+        $this->errors[$operation]++;
       }
-      $result['drupal_status'] = $drupalStatus;
+      elseif (empty($contact['email'])) {
+        $result['drupal_status'] = '** No email **';
+        $this->errors[$operation]++;
+      }
+      else {
+        $result['drupal_status'] = 'Ok';
+        $this->changes[$operation]++;
+      }
     }
+
     // Match data are not available on create.
     if ($operation === CiviCrmUserQueueItem::OPERATION_UPDATE
       || $operation === CiviCrmUserQueueItem::OPERATION_UPDATE) {
@@ -114,6 +144,19 @@ class QueuePreviewController extends ControllerBase {
         $result['drupal_id'] = $user->id();
         $result['drupal_name'] = $user->getUsername();
         $result['drupal_email'] = $user->getEmail();
+        if ($user->getEmail() !== $contact['email']
+          || $user->getUsername() !== $this->getUsername($contact)) {
+          // @todo review for block
+          $result['drupal_status'] .= t('Email or username changes.');
+          $this->changes[$operation]++;
+        }
+        else {
+          $result['drupal_status'] = t('No update');
+        }
+      }
+      else {
+        $result['drupal_status'] = t('** No user found **');
+        $this->errors[$operation]++;
       }
     }
     return $result;
@@ -221,6 +264,26 @@ class QueuePreviewController extends ControllerBase {
     $output = '';
     foreach ($this->getTableItems() as $items) {
       $output .= \Drupal::service('renderer')->renderRoot($items);
+    }
+    foreach ($this->errors as $operation => $numberErrors) {
+      if ($numberErrors > 0) {
+        $this->messenger()->addError(t('@number_errors errors detected for @operation.',
+          [
+            '@number_errors' => $numberErrors,
+            '@operation' => ucfirst($operation),
+          ]
+        ));
+      }
+    }
+    foreach ($this->changes as $operation => $numberChanges) {
+      if ($numberChanges > 0) {
+        $this->messenger()->addWarning(t('@number_changes changes for @operation.',
+          [
+            '@number_changes' => $numberChanges,
+            '@operation' => ucfirst($operation),
+          ]
+        ));
+      }
     }
     return [
       '#type' => 'markup',
