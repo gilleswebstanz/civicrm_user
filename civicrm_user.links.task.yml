@@ -5,6 +5,13 @@ civicrm_user.settings_form:
   description: 'Configure filters and default values for CiviCRM contacts. Create and process queue.'
   weight: 99
 
+civicrm_user.preview_queue:
+  title: 'Preview queue'
+  route_name: civicrm_user.preview_queue
+  base_route: civicrm_user.settings_form
+  description: 'Previews the CivCRM contact to user queue'
+  weight: 99
+
 civicrm_user.create_queue_form:
   title: 'Create queue'
   route_name: civicrm_user.create_queue_form
