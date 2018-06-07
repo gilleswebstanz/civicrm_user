@@ -37,7 +37,8 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
           // Should have already been done by CiviCRM during contact update.
           // but in some situations, a Drupal user could have edited his email.
           // @todo provide in configuration the user email reset as it will
-          // block further access.
+          // block further access or send a mail to the user to let him known
+          // about credentials changes.
           if ($user->getEmail() !== $contact['email']) {
             \Drupal::messenger()->addError(t('User *email* before: @previous_email, after: @current_email.', [
               '@previous_email' => $user->getEmail(),

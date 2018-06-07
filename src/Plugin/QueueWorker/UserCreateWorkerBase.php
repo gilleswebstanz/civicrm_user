@@ -38,22 +38,30 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
     if (!$this->userExists($this->getUsername($contact), $contact['email'])) {
       $config = \Drupal::configFactory()->get('civicrm_user.settings');
       $roles = [];
+      // @todo use user->addRole
       // Flatten role array.
       if (!empty($config->get('role'))) {
         foreach ($config->get('role') as $role) {
           $roles[] = $role;
         }
       }
-      $values = [
-        'name' => $this->getUsername($contact),
-        'pass' => '@todo',
-        'mail' => $contact['email'],
-        'status' => 1,
-        'roles' => $roles,
-      ];
       /** @var \Drupal\user\Entity\User $user */
       try {
+        $values = [
+          'roles' => $roles,
+        ];
         $user = \Drupal::entityTypeManager()->getStorage('user')->create($values);
+        // @todo the language should be passed by CiviCRM via the contact
+        $languageId = \Drupal::languageManager()->getCurrentLanguage()->getId();
+        $user->setUsername($this->getUsername($contact));
+        $user->setEmail($contact['email']);
+        $user->setPassword('@todo');
+        $user->enforceIsNew();
+        $user->set('init', 'email');
+        $user->set('langcode', $languageId);
+        $user->set('preferred_langcode', $languageId);
+        $user->set('preferred_admin_langcode', $languageId);
+        $user->activate();
       }
       catch (InvalidPluginDefinitionException $exception) {
         \Drupal::messenger()->addError($exception->getMessage());
