@@ -12,7 +12,7 @@ civicrm_user.create_queue_form:
   path: '/admin/civicrm_user/queue/create'
   defaults:
     _form: '\Drupal\civicrm_user\Form\CreateQueueForm'
-    _title: 'Create the CivCRM contact to user queue'
+    _title: 'Create the CiviCRM contact to user queue'
   requirements:
     _permission: 'use civicrm user'
   options:
@@ -22,7 +22,7 @@ civicrm_user.process_queue_form:
   path: '/admin/civicrm_user/queue/process'
   defaults:
     _form: '\Drupal\civicrm_user\Form\ProcessQueueForm'
-    _title: 'Process the CivCRM contact to user queue'
+    _title: 'Process the CiviCRM contact to user queue'
   requirements:
     _permission: 'use civicrm user'
   options:
@@ -32,7 +32,7 @@ civicrm_user.preview_queue:
   path: '/admin/civicrm_user/queue/preview'
   defaults:
     _controller: '\Drupal\civicrm_user\Controller\QueuePreviewController::preview'
-    _title: 'Queue Preview'
+    _title: 'Preview the CivCRM contact to user queue'
   requirements:
     _permission: 'use civicrm user'
   options:

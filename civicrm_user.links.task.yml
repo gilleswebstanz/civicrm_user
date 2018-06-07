@@ -9,19 +9,19 @@ civicrm_user.preview_queue:
   title: 'Preview queue'
   route_name: civicrm_user.preview_queue
   base_route: civicrm_user.settings_form
-  description: 'Previews the CivCRM contact to user queue'
+  description: 'Preview the CiviCRM contact to user queue'
   weight: 99
 
 civicrm_user.create_queue_form:
   title: 'Create queue'
   route_name: civicrm_user.create_queue_form
   base_route: civicrm_user.settings_form
-  description: 'Creates the CivCRM contact to user queue'
+  description: 'Create the CiviCRM contact to user queue'
   weight: 99
 
 civicrm_user.process_queue_form:
   title: 'Process queue'
   route_name: civicrm_user.process_queue_form
   base_route: civicrm_user.settings_form
-  description: 'Processes the CivCRM contact to user queue'
+  description: 'Process the CiviCRM contact to user queue'
   weight: 99

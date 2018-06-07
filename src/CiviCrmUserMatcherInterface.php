@@ -29,6 +29,22 @@ interface CiviCrmUserMatcherInterface {
   public function getCandidateMatches(): array;
 
   /**
+   * Checks if a Drupal user already exists.
+   *
+   * This comparison does not handle cases of email or username change.
+   * In these situations, only the UF Match can provide the right comparison.
+   *
+   * @param string $name
+   *   User name.
+   * @param string $email
+   *   User mail.
+   *
+   * @return bool
+   *   A boolean indicating if the user exists.
+   */
+  public function userExists($name, $email);
+
+  /**
    * Returns a CiviCRM contact from a user id.
    *
    * @return array

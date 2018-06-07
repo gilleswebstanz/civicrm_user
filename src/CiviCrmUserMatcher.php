@@ -108,6 +108,21 @@ class CiviCrmUserMatcher implements CiviCrmUserMatcherInterface {
   /**
    * {@inheritdoc}
    */
+  public function userExists($name, $email) {
+    $query = \Drupal::database()->select('users_field_data', 'ufd')
+      ->fields('ufd', ['uid']);
+    $query->condition('uid', '0', '<>');
+    $group = $query->orConditionGroup()
+      ->condition('name', $name)
+      ->condition('mail', $email);
+    $query->condition($group);
+    $queryResult = $query->countQuery()->execute()->fetchField();
+    return (int) $queryResult > 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getContactMatch($user_id): array {
     // TODO: Implement getContactFromUser() method.
     // call getMatches to apply filter.
