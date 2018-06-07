@@ -40,13 +40,14 @@ function civicrm_user_cron() {
   $next_execution = !empty($next_execution) ? $next_execution : 0;
   if ((int) $_SERVER['REQUEST_TIME'] >= $next_execution) {
     // @todo check if manual/cron queue is not running (create helper)
+    // @todo set back queue creator and processor once unit tests have been implemented.
     /* @var \Drupal\civicrm_user\CiviCrmUserQueueCreatorInterface  $creator */
-    $creator = \Drupal::service('civicrm_user.creator');
-    $creator->addItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
+    //$creator = \Drupal::service('civicrm_user.creator');
+    //$creator->addItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
 
     /* @var \Drupal\civicrm_user\CiviCrmUserQueueProcessorInterface  $processor */
-    $processor = \Drupal::service('civicrm_user.processor');
-    $processor->processItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
+    //$processor = \Drupal::service('civicrm_user.processor');
+    //$processor->processItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
 
     \Drupal::logger('civicrm_user')->notice(t('CiviCRM user cron ran.'));
     \Drupal::state()->set('civicrm_user_cron.next_execution', $_SERVER['REQUEST_TIME'] + $interval);
