@@ -149,7 +149,7 @@ class QueuePreviewController extends ControllerBase {
         if ($user->getEmail() !== $contact['email']
           || $user->getUsername() !== $this->getUsername($contact)) {
           // @todo review for block
-          $result['drupal_status'] .= $this->t('Email or username changes.');
+          $result['drupal_status'] = $this->t('Email or username changes.');
           $this->changes[$operation]++;
         }
         else {
