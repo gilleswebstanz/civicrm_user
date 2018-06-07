@@ -4,6 +4,8 @@ namespace Drupal\civicrm_user\Controller;
 
 use Drupal\civicrm_user\CiviCrmUserQueueItem;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\civicrm_user\CiviCrmUserMatcherInterface;
 
@@ -114,7 +116,7 @@ class QueuePreviewController extends ControllerBase {
    */
   private function buildRow(array $contact, $operation) {
     $result = [
-      'contact_id' => $contact['id'],
+      'contact_id' => $this->getContactLink($contact['id']),
       'contact_name' => $contact['sort_name'],
       'contact_email' => $contact['email'],
     ];
@@ -122,15 +124,15 @@ class QueuePreviewController extends ControllerBase {
     // Check if user exists with mail and/or name.
     if ($operation === CiviCrmUserQueueItem::OPERATION_CREATE) {
       if ($this->matcher->userExists($this->getUsername($contact), $contact['email'])) {
-        $result['drupal_status'] = '** Exists **';
+        $result['drupal_status'] = $this->t('** Exists **');
         $this->errors[$operation]++;
       }
       elseif (empty($contact['email'])) {
-        $result['drupal_status'] = '** No email **';
+        $result['drupal_status'] = $this->t('** No email **');
         $this->errors[$operation]++;
       }
       else {
-        $result['drupal_status'] = 'Ok';
+        $result['drupal_status'] = $this->t('Ok');
         $this->changes[$operation]++;
       }
     }
@@ -141,21 +143,21 @@ class QueuePreviewController extends ControllerBase {
       /** @var \Drupal\civicrm_tools\CiviCrmContactInterface $civiCrmToolsContact */
       $civiCrmToolsContact = \Drupal::service('civicrm_tools.contact');
       if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'])) {
-        $result['drupal_id'] = $user->id();
+        $result['drupal_id'] = $this->getUserLink($user->id());
         $result['drupal_name'] = $user->getUsername();
         $result['drupal_email'] = $user->getEmail();
         if ($user->getEmail() !== $contact['email']
           || $user->getUsername() !== $this->getUsername($contact)) {
           // @todo review for block
-          $result['drupal_status'] .= t('Email or username changes.');
+          $result['drupal_status'] .= $this->t('Email or username changes.');
           $this->changes[$operation]++;
         }
         else {
-          $result['drupal_status'] = t('No update');
+          $result['drupal_status'] = $this->t('No update');
         }
       }
       else {
-        $result['drupal_status'] = t('** No user found **');
+        $result['drupal_status'] = $this->t('** No user found **');
         $this->errors[$operation]++;
       }
     }
@@ -196,6 +198,32 @@ class QueuePreviewController extends ControllerBase {
   }
 
   /**
+   * Returns a list of items grouped by operations.
+   *
+   * @return array
+   *   Array of tables containing items.
+   */
+  private function getTableItems() {
+    $result = [];
+    $existingMatches = $this->matcher->getExistingMatches();
+    $candidateMatches = $this->matcher->getCandidateMatches();
+
+    // Create users that are not in the existing matches.
+    $usersToCreate = array_diff_key($candidateMatches, $existingMatches);
+    $result[] = $this->buildTable($usersToCreate, CiviCrmUserQueueItem::OPERATION_CREATE);
+
+    // Block existing matches that are not candidates
+    // for a user account anymore.
+    $usersToBlock = array_diff_key($existingMatches, $candidateMatches);
+    $result[] = $this->buildTable($usersToBlock, CiviCrmUserQueueItem::OPERATION_BLOCK);
+
+    // Update and unblock all other existing matches.
+    $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
+    $result[] = $this->buildTable($usersToUpdate, CiviCrmUserQueueItem::OPERATION_UPDATE);
+    return $result;
+  }
+
+  /**
    * Get the username format that is set in the configuration.
    *
    * @todo refactor with UserWorkerBase
@@ -229,29 +257,35 @@ class QueuePreviewController extends ControllerBase {
   }
 
   /**
-   * Returns a list of items grouped by operations.
+   * Returns a link to a user profile.
    *
-   * @return array
-   *   Array of tables containing items.
+   * @param int $user_id
+   *   Drupal user id.
+   *
+   * @return string
+   *   Rendered link.
    */
-  private function getTableItems() {
-    $result = [];
-    $existingMatches = $this->matcher->getExistingMatches();
-    $candidateMatches = $this->matcher->getCandidateMatches();
+  private function getUserLink($user_id) {
+    $url = Url::fromUserInput('/user/' . $user_id);
+    $link = Link::fromTextAndUrl($user_id, $url);
+    $link = $link->toRenderable();
+    return \Drupal::service('renderer')->renderRoot($link);
+  }
 
-    // Create users that are not in the existing matches.
-    $usersToCreate = array_diff_key($candidateMatches, $existingMatches);
-    $result[] = $this->buildTable($usersToCreate, CiviCrmUserQueueItem::OPERATION_CREATE);
-
-    // Block existing matches that are not candidates
-    // for a user account anymore.
-    $usersToBlock = array_diff_key($existingMatches, $candidateMatches);
-    $result[] = $this->buildTable($usersToBlock, CiviCrmUserQueueItem::OPERATION_BLOCK);
-
-    // Update and unblock all other existing matches.
-    $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
-    $result[] = $this->buildTable($usersToUpdate, CiviCrmUserQueueItem::OPERATION_UPDATE);
-    return $result;
+  /**
+   * Returns a link to a CiviCRM contact profile.
+   *
+   * @param int $contact_id
+   *   CiviCRM contact id.
+   *
+   * @return string
+   *   Rendered link.
+   */
+  private function getContactLink($contact_id) {
+    $url = Url::fromUserInput('/civicrm/contact/view?reset=1&cid=' . $contact_id);
+    $link = Link::fromTextAndUrl($contact_id, $url);
+    $link = $link->toRenderable();
+    return \Drupal::service('renderer')->renderRoot($link);
   }
 
   /**
@@ -267,7 +301,7 @@ class QueuePreviewController extends ControllerBase {
     }
     foreach ($this->errors as $operation => $numberErrors) {
       if ($numberErrors > 0) {
-        $this->messenger()->addError(t('@number_errors errors detected for @operation.',
+        $this->messenger()->addError(t('@number_errors errors detected for @operation operation.',
           [
             '@number_errors' => $numberErrors,
             '@operation' => ucfirst($operation),
@@ -277,7 +311,7 @@ class QueuePreviewController extends ControllerBase {
     }
     foreach ($this->changes as $operation => $numberChanges) {
       if ($numberChanges > 0) {
-        $this->messenger()->addWarning(t('@number_changes changes for @operation.',
+        $this->messenger()->addWarning(t('@number_changes changes for @operation operation.',
           [
             '@number_changes' => $numberChanges,
             '@operation' => ucfirst($operation),
