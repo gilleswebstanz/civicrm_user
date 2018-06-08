@@ -8,3 +8,7 @@ services:
   civicrm_user.processor:
     class: Drupal\civicrm_user\CiviCrmUserQueueProcessor
     arguments: ['@queue', '@plugin.manager.queue_worker', '@state']
+  civicrm_user.route_subscriber:
+    class: Drupal\civicrm_user\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

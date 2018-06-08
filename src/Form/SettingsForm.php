@@ -62,8 +62,9 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // @todo provide default values
     $config = $this->config('civicrm_user.settings');
-    $this->displayWork();
+    $this->displayWorkSummary();
 
     $groups = $this->civicrmToolsApi->getAll('Group', []);
     $groupOptions = [];
@@ -153,6 +154,12 @@ class SettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $config->get('operation'),
     ];
+    $form['user_readonly'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('User read only'),
+      '#description' => $this->t('Block data modification on users within Drupal (register, edit, delete).'),
+      '#default_value' => $config->get('user_readonly'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -169,13 +176,14 @@ class SettingsForm extends ConfigFormBase {
       ->set('username', $form_state->getValue('username'))
       ->set('role', $form_state->getValue('role'))
       ->set('operation', $form_state->getValue('operation'))
+      ->set('user_readonly', $form_state->getValue('user_readonly'))
       ->save();
   }
 
   /**
    * Display what needs to be processed by workers based on the configuration.
    */
-  private function displayWork() {
+  private function displayWorkSummary() {
     /** @var \Drupal\civicrm_user\CiviCrmUserMatcherInterface $matcher */
     $matcher = \Drupal::service('civicrm_user.matcher');
     $existingMatches = $matcher->getExistingMatches();
