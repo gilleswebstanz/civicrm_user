@@ -4,8 +4,6 @@ Operations on Drupal _User_ entities based on a CiviCRM _Contact_ data source.
 Useful when the process of creating users is not delegated to Drupal
 (existing CiviCRM contacts, frontend user registration disabled, ...).
 
-@todo mention to block all user edition, ...
-
 Creates, updates or blocks Drupal users from CiviCRM contacts.
 
 These operations are based on filters:
