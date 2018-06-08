@@ -153,7 +153,7 @@ class QueuePreviewController extends ControllerBase {
           $this->changes[$operation]++;
         }
         else {
-          $result['drupal_status'] = $this->t('No update');
+          $result['drupal_status'] = $this->t('No update needed.');
         }
       }
       else {
@@ -301,6 +301,7 @@ class QueuePreviewController extends ControllerBase {
     }
     foreach ($this->errors as $operation => $numberErrors) {
       if ($numberErrors > 0) {
+        // @todo format plural
         $this->messenger()->addError(t('@number_errors errors detected for @operation operation.',
           [
             '@number_errors' => $numberErrors,
@@ -311,6 +312,7 @@ class QueuePreviewController extends ControllerBase {
     }
     foreach ($this->changes as $operation => $numberChanges) {
       if ($numberChanges > 0) {
+        // @todo format plural
         $this->messenger()->addWarning(t('@number_changes changes for @operation operation.',
           [
             '@number_changes' => $numberChanges,

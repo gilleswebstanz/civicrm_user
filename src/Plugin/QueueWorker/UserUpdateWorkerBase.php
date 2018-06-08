@@ -61,9 +61,10 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
             // Unblock user as it can have been blocked previously.
             $user->activate();
             $user->save();
+
+            // Then update the contact match table.
+            $this->setContactMatch($user, $contact);
           }
-          // Then update the contact match table.
-          $this->setContactMatch($user, $contact);
         }
         catch (EntityStorageException $exception) {
           \Drupal::messenger()->addError($exception->getMessage());
