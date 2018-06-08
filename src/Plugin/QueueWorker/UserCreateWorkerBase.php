@@ -32,12 +32,31 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
    */
   private function createUser(array $contact) {
     $result = 0;
+    // @todo refactor with QueuePreviewController error management.
+    // The contact must have an email address.
+    if (empty($contact['email'])) {
+      \Drupal::messenger()->addWarning(t('No email address for contact id @contact_id.', [
+        '@contact_id' => $contact['contact_id'],
+      ]));
+      return $result;
+    }
+
+    // If the contact name is not set, default to the email address.
+    $userName = $this->getUsername($contact);
+    if (empty($userName)) {
+      \Drupal::messenger()->addWarning(t('No username for the contact id @contact_id, default to email address.', [
+        '@contact_id' => $contact['contact_id'],
+      ]));
+      $userName = $contact['email'];
+    }
+
     // The contact match may not be in the match table yet,
-    // or could be corrupted,
-    // so test if the Drupal user exists first.
-    /** @var CiviCrmUserMatcher $matcher */
+    // or the match table could be corrupted,
+    // so test if the Drupal user exists by comparing the username and email.
+    /** @var \Drupal\civicrm_user\CiviCrmUserMatcherInterface $matcher */
     $matcher = \Drupal::service('civicrm_user.matcher');
-    if (!$matcher->userExists($this->getUsername($contact), $contact['email'])) {
+
+    if (!$matcher->userExists($userName, $contact['email'])) {
       $config = \Drupal::configFactory()->get('civicrm_user.settings');
       $roles = [];
       // @todo use user->addRole
@@ -55,7 +74,7 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
         $user = \Drupal::entityTypeManager()->getStorage('user')->create($values);
         // @todo the language should be passed by CiviCRM via the contact
         $languageId = \Drupal::languageManager()->getCurrentLanguage()->getId();
-        $user->setUsername($this->getUsername($contact));
+        $user->setUsername($userName);
         $user->setEmail($contact['email']);
         $user->setPassword('@todo');
         $user->enforceIsNew();
@@ -80,8 +99,8 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
     else {
       // This may be a contact from CiviCRM that shares the same email address.
       // The update queue will take care of updating these ones.
-      \Drupal::messenger()->addWarning(t('Tried to create an existing user with @username and email @email', [
-        '@username' => $this->getUsername($contact),
+      \Drupal::messenger()->addWarning(t('The Drupal user account exists for username <em>@username</em> and email <em>@email</em>.', [
+        '@username' => $userName,
         '@email' => $contact['email'],
       ]));
     }

@@ -36,7 +36,6 @@ class RouteSubscriber extends RouteSubscriberBase {
 
     // @todo Disallow user edit.
     // Route provided by UserRouteProvider.
-
     // @todo Disallow user delete.
   }
 

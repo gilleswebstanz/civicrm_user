@@ -32,7 +32,7 @@ civicrm_user.preview_queue:
   path: '/admin/civicrm_user/queue/preview'
   defaults:
     _controller: '\Drupal\civicrm_user\Controller\QueuePreviewController::preview'
-    _title: 'Preview the CivCRM contact to user queue'
+    _title: 'Preview the CiviCRM contact to user queue'
   requirements:
     _permission: 'use civicrm user'
   options:

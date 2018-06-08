@@ -28,6 +28,7 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
    *   CiviCRM contact.
    */
   private function updateUser(array $contact) {
+    // @todo refactor with QueuePreviewController error management.
     /** @var \Drupal\civicrm_tools\CiviCrmContactInterface $civiCrmToolsContact */
     $civiCrmToolsContact = \Drupal::service('civicrm_tools.contact');
     if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'])) {

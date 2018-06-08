@@ -48,7 +48,7 @@ interface CiviCrmUserMatcherInterface {
    * Returns a CiviCRM contact from a user id.
    *
    * @return array
-   *   The CivCRM contact that matches the Drupal user.
+   *   The CiviCRM contact that matches the Drupal user.
    */
   public function getContactMatch($user_id): array;
 
