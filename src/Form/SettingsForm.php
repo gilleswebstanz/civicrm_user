@@ -92,17 +92,21 @@ class SettingsForm extends ConfigFormBase {
       $roleOptions[$key] = $role->label();
     }
 
+    $form['filters'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Filters'),
+      '#description' => $this->t('Filters are cumulative (uses the <em>and</em> operator).'),
+    ];
     // @todo this value could be fetched from the civicrm.settings.php file
-    // @todo group filters in a fieldset
-    $form['domain_id'] = [
+    $form['filters']['domain_id'] = [
       '#type' => 'number',
       '#title' => $this->t('Domain id'),
-      '#description' => $this->t('CiviCRM domain id. By default 1. Modify if multiple website instances of a frontend are accessing CiviCRM, this is the domain id that can be found in <em>civicrm.setting.php</em>.'),
+      '#description' => $this->t('CiviCRM domain id. By default 1. Modify if multiple website instances of a frontend are accessing CiviCRM. The domain id value can be found in <em>civicrm.setting.php</em>.'),
       '#min' => 1,
       '#step' => 1,
       '#default_value' => empty($config->get('domain_id')) ? 1 : $config->get('domain_id'),
     ];
-    $form['group'] = [
+    $form['filters']['group'] = [
       '#type' => 'select',
       '#title' => $this->t('Group'),
       '#description' => $this->t('Limit Drupal users to the selected groups. All apply if none selected.'),
@@ -111,7 +115,7 @@ class SettingsForm extends ConfigFormBase {
       '#size' => 5,
       '#default_value' => $config->get('group'),
     ];
-    $form['tag'] = [
+    $form['filters']['tag'] = [
       '#type' => 'select',
       '#title' => $this->t('Tag'),
       '#description' => $this->t('Limit Drupal users to the selected tags. All apply if none selected.'),
@@ -121,15 +125,18 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('tag'),
     ];
 
-    // @todo group user default values in a fieldset
-    $form['username'] = [
+    $form['user_default'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Drupal user default values'),
+    ];
+    $form['user_default']['username'] = [
       '#type' => 'select',
       '#title' => $this->t('Username'),
       '#description' => $this->t('The Drupal username will be set from this CiviCRM contact value.'),
       '#options' => $contactValueOptions,
       '#default_value' => $config->get('username'),
     ];
-    $form['role'] = [
+    $form['user_default']['role'] = [
       '#type' => 'select',
       '#title' => $this->t('Role'),
       '#description' => $this->t('Role(s) to assign to the newly created user.'),
@@ -139,11 +146,14 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('role'),
     ];
 
-    // @todo group operation in a fieldset
+    $form['drupal_operations'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Drupal operations'),
+    ];
     // @todo this choice should probably not be exposed to all users
     // its sole usage is to update before creating to cover use cases such
     // as existing users that have evolved without keeping a sync with contacts.
-    $form['operation'] = [
+    $form['drupal_operations']['operation'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Operation'),
       '#description' => $this->t('Operation(s) to run on Drupal users.'),
@@ -154,10 +164,10 @@ class SettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $config->get('operation'),
     ];
-    $form['user_readonly'] = [
+    $form['drupal_operations']['user_readonly'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('User read only'),
-      '#description' => $this->t('Block data modification on users within Drupal (register, edit, delete).'),
+      '#description' => $this->t('Block data modification on users within Drupal (register, add, edit, delete).'),
       '#default_value' => $config->get('user_readonly'),
     ];
     return parent::buildForm($form, $form_state);
