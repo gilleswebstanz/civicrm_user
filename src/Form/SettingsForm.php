@@ -190,6 +190,8 @@ class SettingsForm extends ConfigFormBase {
       ->save();
   }
 
+  // @todo add validation for at least one of the two filters (group or tag)
+
   /**
    * Display what needs to be processed by workers based on the configuration.
    */
