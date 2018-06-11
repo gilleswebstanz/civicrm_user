@@ -137,7 +137,7 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('username'),
     ];
     $form['user_default']['passwd'] = [
-      '#type' => 'password',
+      '#type' => 'textfield',
       '#title' => $this->t('Password'),
       '#description' => $this->t('Default password. For testing purpose only, when the context does not allow Masquerade or drush uli.'),
       '#default_value' => $config->get('passwd'),
