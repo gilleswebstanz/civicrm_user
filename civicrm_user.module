@@ -50,3 +50,14 @@ function civicrm_user_cron() {
     \Drupal::state()->set('civicrm_user_cron.next_execution', $_SERVER['REQUEST_TIME'] + $interval);
   }
 }
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function civicrm_user_user_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  // Send mail when a user is inserted.
+  // @todo check if user is not already notified + provide configuration to actually send.
+  // It makes sense to include this in a user insert hook because of the
+  // possibility to configure civicrm_user to prevent user operations within Drupal.
+  _user_mail_notify('register_no_approval_required', $entity);
+}
