@@ -156,10 +156,6 @@ class QueuePreviewController extends ControllerBase {
           $result['drupal_status'] = $this->t('No update needed.');
         }
       }
-      else {
-        $result['drupal_status'] = $this->t('** No user found **');
-        $this->errors[$operation]++;
-      }
     }
     return $result;
   }

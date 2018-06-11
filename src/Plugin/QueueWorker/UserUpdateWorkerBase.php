@@ -41,7 +41,7 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
           // block further access or send a mail to the user to let him known
           // about credentials changes.
           if ($user->getEmail() !== $contact['email']) {
-            \Drupal::messenger()->addError(t('User *email* before: @previous_email, after: @current_email.', [
+            \Drupal::messenger()->addWarning(t('User *email* before: @previous_email, after: @current_email.', [
               '@previous_email' => $user->getEmail(),
               '@current_email' => $contact['email'],
             ]));
