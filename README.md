@@ -42,7 +42,7 @@ Head to 'Configuration > People > CiviCRM User'
 
 #### Mandatory
 
-- Pay extra attention the the Domain ID, if your are working with multiple
+- Pay extra attention to the Domain ID, if your are working with multiple
 front-ends for CiviCRM (e.g. 2 Drupal sites).
 - Configure at least one filter for the user creation (group or tag),
 as importing all your CiviCRM contacts is probably not what you want and it 

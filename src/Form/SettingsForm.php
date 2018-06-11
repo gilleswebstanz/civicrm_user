@@ -136,6 +136,12 @@ class SettingsForm extends ConfigFormBase {
       '#options' => $contactValueOptions,
       '#default_value' => $config->get('username'),
     ];
+    $form['user_default']['passwd'] = [
+      '#type' => 'password',
+      '#title' => $this->t('Password'),
+      '#description' => $this->t('Default password. For testing purpose only, when the context does not allow Masquerade or drush uli.'),
+      '#default_value' => $config->get('passwd'),
+    ];
     $form['user_default']['role'] = [
       '#type' => 'select',
       '#title' => $this->t('Role'),
@@ -185,6 +191,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('tag', $form_state->getValue('tag'))
       ->set('username', $form_state->getValue('username'))
       ->set('role', $form_state->getValue('role'))
+      ->set('passwd', $form_state->getValue('passwd'))
       ->set('operation', $form_state->getValue('operation'))
       ->set('user_readonly', $form_state->getValue('user_readonly'))
       ->save();

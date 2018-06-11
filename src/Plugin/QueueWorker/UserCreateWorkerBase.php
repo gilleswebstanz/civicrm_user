@@ -66,6 +66,15 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
           $roles[] = $role;
         }
       }
+      // Set default password.
+      // Password taken from the config is for testing purpose only.
+      $password = NULL;
+      if (!empty($config->get('passwd'))) {
+        $password = $config->get('passwd');
+      }else {
+        $password = user_password();
+      }
+
       /** @var \Drupal\user\Entity\User $user */
       try {
         $values = [
@@ -76,7 +85,7 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
         $languageId = \Drupal::languageManager()->getCurrentLanguage()->getId();
         $user->setUsername($userName);
         $user->setEmail($contact['email']);
-        $user->setPassword('@todo');
+        $user->setPassword($password);
         $user->enforceIsNew();
         $user->set('init', 'email');
         $user->set('langcode', $languageId);
