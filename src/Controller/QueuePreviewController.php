@@ -115,6 +115,8 @@ class QueuePreviewController extends ControllerBase {
    *   Array mapped to header.
    */
   private function buildRow(array $contact, $operation) {
+    $config = \Drupal::configFactory()->get('civicrm_user.settings');
+    $domainId = $config->get('domain_id');
     // @fixme block operation returns a contact match
     $result = [
       'contact_id' => $this->getContactLink($contact['id']),
@@ -143,7 +145,7 @@ class QueuePreviewController extends ControllerBase {
       || $operation === CiviCrmUserQueueItem::OPERATION_BLOCK) {
       /** @var \Drupal\civicrm_tools\CiviCrmContactInterface $civiCrmToolsContact */
       $civiCrmToolsContact = \Drupal::service('civicrm_tools.contact');
-      if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'])) {
+      if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'], $domainId)) {
         $result['drupal_id'] = $this->getUserLink($user->id());
         $result['drupal_name'] = $user->getUsername();
         $result['drupal_email'] = $user->getEmail();

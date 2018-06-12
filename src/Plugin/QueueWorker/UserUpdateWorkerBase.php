@@ -29,26 +29,32 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
    */
   private function updateUser(array $contact) {
     // @todo refactor with QueuePreviewController error management.
+    $config = \Drupal::configFactory()->get('civicrm_user.settings');
+    $domainId = $config->get('domain_id');
     /** @var \Drupal\civicrm_tools\CiviCrmContactInterface $civiCrmToolsContact */
     $civiCrmToolsContact = \Drupal::service('civicrm_tools.contact');
-    if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'])) {
+    if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'], $domainId)) {
       if ($user instanceof User) {
         try {
           $hasChanged = FALSE;
           // Should have already been done by CiviCRM during contact update.
-          // but in some situations, a Drupal user could have edited his email.
+          // but a Drupal user could have edited his email.
           // @todo provide in configuration the user email reset as it will
           // block further access or send a mail to the user to let him known
           // about credentials changes.
           if ($user->getEmail() !== $contact['email']) {
-            \Drupal::messenger()->addWarning(t('User *email* before: @previous_email, after: @current_email.', [
+            \Drupal::messenger()->addWarning(t('User @user_id / contact @contact_id *email* before: @previous_email, after: @current_email.', [
+              '@user_id' => $user->id(),
+              '@contact_id' => $contact['contact_id'],
               '@previous_email' => $user->getEmail(),
               '@current_email' => $contact['email'],
             ]));
             $hasChanged = TRUE;
           }
           if ($user->getUsername() !== $this->getUsername($contact)) {
-            \Drupal::messenger()->addWarning(t('User *name* before: @previous_name, after: @current_name.', [
+            \Drupal::messenger()->addWarning(t('User @user_id / contact @contact_id *name* before: @previous_name, after: @current_name.', [
+              '@user_id' => $user->id(),
+              '@contact_id' => $contact['contact_id'],
               '@previous_name' => $user->getUsername(),
               '@current_name' => $this->getUsername($contact),
             ]));
@@ -63,17 +69,32 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
             $user->setEmail($contact['email']);
             $user->setUsername($this->getUsername($contact));
             // Unblock user as it can have been blocked previously.
+            // @todo check here from the configuration if the user has been activated
+            // if an email needs to be sent (and it should, apart from manual notification).
             $user->activate();
-            $user->save();
-
-            // Then update the contact match table and log operation.
-            $this->setContactMatch($user, $contact);
+            if($user->save()) {
+              // Then update the contact match table and log operation.
+              $this->setContactMatch($user, $contact);
+            }else {
+              \Drupal::messenger()->addError(t('User already exists. Contact id: @contact_id. User id: @user_id. *name* before: @previous_name, after: @current_name. *email* before: @previous_email, after: @current_email.', [
+                '@contact_id' => $contact['contact_id'],
+                '@user_id' => $user->id(),
+                '@previous_name' => $user->getUsername(),
+                '@current_name' => $this->getUsername($contact),
+                '@previous_email' => $user->getEmail(),
+                '@current_email' => $contact['email'],
+              ]));
+            }
           }
         }
         catch (EntityStorageException $exception) {
           \Drupal::messenger()->addError($exception->getMessage());
         }
       }
+    }else {
+      \Drupal::messenger()->addError(t('User match not found for contact id @contact_id', [
+        '@contact_id' => $contact['contact_id'],
+      ]));
     }
   }
 
