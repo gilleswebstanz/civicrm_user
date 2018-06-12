@@ -162,11 +162,13 @@ class SettingsForm extends ConfigFormBase {
     $form['drupal_operations']['operation'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Operation'),
-      '#description' => $this->t('Operation(s) to run on Drupal users.'),
+      '#description' => $this->t('Operation(s) to run on Drupal users. Currently "Create" only, "Update" and "Block" needs more tests.'),
       '#options' => [
         CiviCrmUserQueueItem::OPERATION_CREATE => t('Create'),
-        CiviCrmUserQueueItem::OPERATION_UPDATE => t('Update'),
-        CiviCrmUserQueueItem::OPERATION_BLOCK => t('Block'),
+        // @todo update needs mail notification to user and edge cases debug
+        //CiviCrmUserQueueItem::OPERATION_UPDATE => t('Update'),
+        // @todo update needs test
+        //CiviCrmUserQueueItem::OPERATION_BLOCK => t('Block'),
       ],
       '#default_value' => $config->get('operation'),
     ];
