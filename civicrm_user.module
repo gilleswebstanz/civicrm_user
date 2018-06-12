@@ -16,7 +16,7 @@ function civicrm_user_help($route_name, RouteMatchInterface $route_match) {
     case 'help.page.civicrm_user':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating users is not delegated to the Drupal frontend.') . '</p>';
+      $output .= '<p>' . t('Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating and editing users is not delegated to Drupal.') . '</p>';
       return $output;
 
     default:
@@ -61,3 +61,8 @@ function civicrm_user_user_insert(Drupal\Core\Entity\EntityInterface $entity) {
   // possibility to configure civicrm_user to prevent user operations within Drupal.
   _user_mail_notify('register_no_approval_required', $entity);
 }
+
+
+// @todo node edit form alter
+//$config = \Drupal::configFactory()->get('civicrm_user.settings');
+//$isReadOnly = $config->get('user_readonly');
