@@ -33,11 +33,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       // @todo add message about the readonly configuration.
       $route->setRequirement('_access', 'FALSE');
     }
-    // Disallow user edit.
-    if ($route = $collection->get('entity.user.edit_form')) {
-      // @todo add message about the readonly configuration.
-      $route->setRequirement('_access', 'FALSE');
-    }
+
     // Disallow user delete.
     // @todo this will not prevent batch deletion.
     // if ($route = $collection->get('entity.user.cancel_form')) {.
