@@ -56,13 +56,17 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
           }
 
           if ($hasChanged) {
+            // Log before applying the change.
+            // @todo refactor with reportWork
+            $this->logOperation($user, $contact, CiviCrmUserQueueItem::OPERATION_UPDATE);
+
             $user->setEmail($contact['email']);
             $user->setUsername($this->getUsername($contact));
             // Unblock user as it can have been blocked previously.
             $user->activate();
             $user->save();
 
-            // Then update the contact match table.
+            // Then update the contact match table and log operation.
             $this->setContactMatch($user, $contact);
           }
         }

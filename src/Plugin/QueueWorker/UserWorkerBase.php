@@ -215,4 +215,37 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
     Database::setActiveConnection();
   }
 
+  /**
+   * Logs the operation on the user entity.
+   *
+   * @param \Drupal\user\Entity\User $user
+   *   Drupal user.
+   *
+   * @param array $contact
+   *   CiviCRM contact or contact match.
+   *
+   * @param string $operation
+   *   Operation on the user.
+   */
+  protected function logOperation(User $user, array $contact, $operation) {
+    $fields = [
+      'uid' => (int) $user->id(),
+      'contact_id' => (int) $contact['contact_id'],
+      'user_name' => (string) $user->getUsername(),
+      'user_mail' => (string) $user->getEmail(),
+      'operation' => (string) $operation,
+      'timestamp' => \Drupal::time()->getRequestTime(),
+    ];
+    try {
+      $insert = \Drupal::database()->insert('civicrm_user_log');
+      $insert->fields($fields);
+      $insert->execute();
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('civicrm_user')->error($e->getMessage());
+      \Drupal::messenger()->addError($e->getMessage());
+    }
+  }
+
+
 }

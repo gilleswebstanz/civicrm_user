@@ -173,7 +173,7 @@ class SettingsForm extends ConfigFormBase {
     $form['drupal_operations']['user_readonly'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('User read only'),
-      '#description' => $this->t('Block data modification on users within Drupal (register, add, edit, delete).'),
+      '#description' => $this->t('Block data modification on users within Drupal (register, add, edit user name and email, delete).'),
       '#default_value' => $config->get('user_readonly'),
     ];
     return parent::buildForm($form, $form_state);

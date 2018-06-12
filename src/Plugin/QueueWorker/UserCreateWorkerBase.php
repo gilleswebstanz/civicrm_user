@@ -98,12 +98,13 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
       }
       try {
         $result = $user->save();
+        $this->setContactMatch($user, $contact);
+        // @todo refactor with reportWork
+        $this->logOperation($user, $contact, CiviCrmUserQueueItem::OPERATION_CREATE);
       }
       catch (EntityStorageException $exception) {
         \Drupal::messenger()->addError($exception->getMessage());
       }
-
-      $this->setContactMatch($user, $contact);
     }
     else {
       // This may be a contact from CiviCRM that shares the same email address.

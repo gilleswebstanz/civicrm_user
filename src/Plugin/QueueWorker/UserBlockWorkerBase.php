@@ -16,7 +16,7 @@ abstract class UserBlockWorkerBase extends UserWorkerBase {
    */
   public function processItem($item) {
     if ($item instanceof CiviCrmUserQueueItem) {
-      $this->blockUser($item->getContact()['uid']);
+      $this->blockUser($item);
       $this->reportWork(get_class(), $item);
     }
   }
@@ -24,16 +24,21 @@ abstract class UserBlockWorkerBase extends UserWorkerBase {
   /**
    * When the User does not match the criterion defined by the match filter.
    *
-   * @param int $uid
-   *   User id.
+   * @param int $item
+   *   Process item.
    */
-  private function blockUser($uid) {
+  private function blockUser($item) {
     /** @var \Drupal\user\Entity\User $user */
     try {
-      $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
-      if ($user->isActive()) {
-        $user->block();
-        $user->save();
+      if($item instanceof CiviCrmUserQueueItem) {
+        $uid = $item->getContact()['uid'];
+        $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+        if ($user->isActive()) {
+          $user->block();
+          $user->save();
+          // @todo refactor with reportWork
+          $this->logOperation($user, $item->getContact(), CiviCrmUserQueueItem::OPERATION_BLOCK);
+        }
       }
     }
     catch (InvalidPluginDefinitionException $exception) {

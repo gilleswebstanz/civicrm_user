@@ -115,6 +115,7 @@ class QueuePreviewController extends ControllerBase {
    *   Array mapped to header.
    */
   private function buildRow(array $contact, $operation) {
+    // @fixme block operation returns a contact match
     $result = [
       'contact_id' => $this->getContactLink($contact['id']),
       'contact_name' => $contact['sort_name'],
@@ -139,7 +140,7 @@ class QueuePreviewController extends ControllerBase {
 
     // Match data are not available on create.
     if ($operation === CiviCrmUserQueueItem::OPERATION_UPDATE
-      || $operation === CiviCrmUserQueueItem::OPERATION_UPDATE) {
+      || $operation === CiviCrmUserQueueItem::OPERATION_BLOCK) {
       /** @var \Drupal\civicrm_tools\CiviCrmContactInterface $civiCrmToolsContact */
       $civiCrmToolsContact = \Drupal::service('civicrm_tools.contact');
       if ($user = $civiCrmToolsContact->getUserFromContactId($contact['contact_id'])) {
