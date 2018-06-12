@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the civicrm_user module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function civicrm_user_schema() {
+  $schema['civicrm_user_log'] = [
+    'description' => 'Logs operations on users made by the CiviCRM user module.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid.',
+      ],
+      'contact_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The CiviCRM contact id.',
+      ],
+      'user_name' => [
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The user name.',
+      ],
+      'user_mail' => [
+        'type' => 'varchar_ascii',
+        'length' => 254,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The user email address.',
+      ],
+      'operation' => [
+        'type' => 'varchar_ascii',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "The operation on the user.",
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'uid' => ['uid'],
+    ],
+  ];
+  return $schema;
+}
