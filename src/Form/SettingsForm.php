@@ -175,7 +175,7 @@ class SettingsForm extends ConfigFormBase {
     $form['drupal_operations']['user_readonly'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('User read only'),
-      '#description' => $this->t('Block data modification on users within Drupal (register, add, edit user name and email, delete).'),
+      '#description' => $this->t('Block modification on users within Drupal (register, add, edit user name and email, delete).'),
       '#default_value' => $config->get('user_readonly'),
     ];
     return parent::buildForm($form, $form_state);
@@ -217,7 +217,7 @@ class SettingsForm extends ConfigFormBase {
     // Update and unblock all other existing matches.
     $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
 
-    $this->messenger()->addWarning($this->t('Users to create: @number_create, to update: @number_update, to block: @number_block.', [
+    $this->messenger()->addWarning($this->t('Users to create: @number_create, to update (potentially) : @number_update, to block: @number_block.', [
       '@number_create' => count($usersToCreate),
       '@number_update' => count($usersToUpdate),
       '@number_block' => count($usersToBlock),
