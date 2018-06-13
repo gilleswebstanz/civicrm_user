@@ -30,7 +30,7 @@ abstract class UserBlockWorkerBase extends UserWorkerBase {
   private function blockUser($item) {
     /** @var \Drupal\user\Entity\User $user */
     try {
-      if($item instanceof CiviCrmUserQueueItem) {
+      if ($item instanceof CiviCrmUserQueueItem) {
         $uid = $item->getContact()['uid'];
         $user = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
         if ($user->isActive()) {

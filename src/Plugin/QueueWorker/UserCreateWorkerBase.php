@@ -71,7 +71,8 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
       $password = NULL;
       if (!empty($config->get('passwd'))) {
         $password = $config->get('passwd');
-      }else {
+      }
+      else {
         $password = user_password();
       }
 

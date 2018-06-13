@@ -72,10 +72,11 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
             // @todo check here from the configuration if the user has been activated
             // if an email needs to be sent (and it should, apart from manual notification).
             $user->activate();
-            if($user->save()) {
+            if ($user->save()) {
               // Then update the contact match table and log operation.
               $this->setContactMatch($user, $contact);
-            }else {
+            }
+            else {
               \Drupal::messenger()->addError(t('User already exists. Contact id: @contact_id. User id: @user_id. *name* before: @previous_name, after: @current_name. *email* before: @previous_email, after: @current_email.', [
                 '@contact_id' => $contact['contact_id'],
                 '@user_id' => $user->id(),
@@ -91,7 +92,8 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
           \Drupal::messenger()->addError($exception->getMessage());
         }
       }
-    }else {
+    }
+    else {
       \Drupal::messenger()->addError(t('User match not found for contact id @contact_id', [
         '@contact_id' => $contact['contact_id'],
       ]));

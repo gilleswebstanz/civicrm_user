@@ -168,7 +168,7 @@ class SettingsForm extends ConfigFormBase {
         // @todo update needs mail notification to user and edge cases debug
         CiviCrmUserQueueItem::OPERATION_UPDATE => t('Update'),
         // @todo update needs test
-        //CiviCrmUserQueueItem::OPERATION_BLOCK => t('Block'),
+        // CiviCrmUserQueueItem::OPERATION_BLOCK => t('Block'),
       ],
       '#default_value' => $config->get('operation'),
     ];

@@ -247,5 +247,4 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
     }
   }
 
-
 }

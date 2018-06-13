@@ -5,6 +5,8 @@
  * Contains civicrm_user.module.
  */
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -54,7 +56,7 @@ function civicrm_user_cron() {
 /**
  * Implements hook_ENTITY_TYPE_insert().
  */
-function civicrm_user_user_insert(Drupal\Core\Entity\EntityInterface $entity) {
+function civicrm_user_user_insert(EntityInterface $entity) {
   // Send mail when a user is inserted.
   // @todo check if user is not already notified + provide configuration to actually send.
   // It makes sense to include this in a user insert hook because of the
@@ -65,10 +67,10 @@ function civicrm_user_user_insert(Drupal\Core\Entity\EntityInterface $entity) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function civicrm_user_form_user_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+function civicrm_user_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $config = \Drupal::configFactory()->get('civicrm_user.settings');
   $isReadOnly = $config->get('user_readonly');
-  if($isReadOnly) {
+  if ($isReadOnly) {
     $form['account']['name']['#disabled'] = TRUE;
     $form['account']['mail']['#disabled'] = TRUE;
   }
