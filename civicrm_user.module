@@ -8,6 +8,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\civicrm_user\CiviCrmUserQueueItem;
 
 /**
  * Implements hook_help().
@@ -31,25 +32,25 @@ function civicrm_user_help($route_name, RouteMatchInterface $route_match) {
  * Executes Contact to User operations.
  */
 function civicrm_user_cron() {
-  // Defaults to an hourly interval.
-  // Cron has to be running at least hourly for this to work.
-  // @todo configure interval in settings form
-  $interval = 3600;
-  // We usually don't want to act every time cron runs (which could be every
-  // minute) so keep a time for the next run in the site state.
-  $next_execution = \Drupal::state()->get('civicrm_user_cron.next_execution');
-  $next_execution = !empty($next_execution) ? $next_execution : 0;
-  if ((int) $_SERVER['REQUEST_TIME'] >= $next_execution) {
-    // @todo check if manual/cron queue is not running (create helper)
-    // @todo set back queue creator and processor once unit tests have been implemented.
-    /* @var \Drupal\civicrm_user\CiviCrmUserQueueCreatorInterface  $creator */
-    // $creator = \Drupal::service('civicrm_user.creator');
-    // $creator->addItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
-    /* @var \Drupal\civicrm_user\CiviCrmUserQueueProcessorInterface  $processor */
-    // $processor = \Drupal::service('civicrm_user.processor');
-    // $processor->processItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
-    \Drupal::logger('civicrm_user')->notice(t('CiviCRM user cron ran.'));
-    \Drupal::state()->set('civicrm_user_cron.next_execution', $_SERVER['REQUEST_TIME'] + $interval);
+  $config = \Drupal::configFactory()->get('civicrm_user.settings');
+  if ($config->get('enable_cron') === 1) {
+    // We usually don't want to act every time cron runs (which could be every
+    // minute) so keep a time for the next run in the site state.
+    $interval = $config->get('cron_interval');
+    $nextExecution = \Drupal::state()->get('civicrm_user_cron.next_execution');
+    $nextExecution = !empty($nextExecution) ? $nextExecution : 0;
+    if ((int) $_SERVER['REQUEST_TIME'] >= (int) $nextExecution) {
+      // @todo check if manual/cron queue is not running (create helper)
+      // @todo set back queue creator and processor once unit tests have been implemented.
+      /* @var \Drupal\civicrm_user\CiviCrmUserQueueCreatorInterface  $creator */
+      $creator = \Drupal::service('civicrm_user.creator');
+      $creator->addItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
+      /* @var \Drupal\civicrm_user\CiviCrmUserQueueProcessorInterface  $processor */
+      $processor = \Drupal::service('civicrm_user.processor');
+      $processor->processItems(CiviCrmUserQueueItem::QUEUE_TYPE_CRON);
+      \Drupal::logger('civicrm_user')->notice(t('CiviCRM user cron ran.'));
+      \Drupal::state()->set('civicrm_user_cron.next_execution', (int) $_SERVER['REQUEST_TIME'] + (int) $interval);
+    }
   }
 }
 

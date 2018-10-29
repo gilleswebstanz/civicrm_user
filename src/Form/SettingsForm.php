@@ -104,6 +104,7 @@ class SettingsForm extends ConfigFormBase {
       '#description' => $this->t('CiviCRM domain id. By default 1. Modify if multiple website instances of a frontend are accessing CiviCRM. The domain id value can be found in <em>civicrm.setting.php</em>.'),
       '#min' => 1,
       '#step' => 1,
+      '#required' => TRUE,
       '#default_value' => empty($config->get('domain_id')) ? 1 : $config->get('domain_id'),
     ];
     $form['filters']['group'] = [
@@ -134,12 +135,14 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Username'),
       '#description' => $this->t('The Drupal username will be set from this CiviCRM contact value.'),
       '#options' => $contactValueOptions,
+      '#required' => TRUE,
       '#default_value' => $config->get('username'),
     ];
     $form['user_default']['passwd'] = [
+    // @todo use password field
       '#type' => 'textfield',
       '#title' => $this->t('Password'),
-      '#description' => $this->t('Default password. For testing purpose only, when the context does not allow Masquerade or drush uli.'),
+      '#description' => $this->t('Default password.'),
       '#default_value' => $config->get('passwd'),
     ];
     $form['user_default']['role'] = [
@@ -172,6 +175,31 @@ class SettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $config->get('operation'),
     ];
+    $form['drupal_operations']['enable_cron'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable cron'),
+      '#description' => $this->t('Create and process the queue automatically, via the Drupal cron.'),
+      '#default_value' => $config->get('enable_cron'),
+    ];
+    $form['drupal_operations']['cron_interval'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Cron interval'),
+      '#description' => $this->t('Create and process the user queue based on this interval.'),
+      '#default_value' => $config->get('cron_interval'),
+      '#options' => [
+        10800 => $this->t('3 hours'),
+        21600 => $this->t('6 hours'),
+        86400 => $this->t('1 day'),
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="enable_cron"]' => ['checked' => TRUE],
+        ],
+        'required' => [
+          ':input[name="enable_cron"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     $form['drupal_operations']['user_readonly'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('User read only'),
@@ -196,6 +224,8 @@ class SettingsForm extends ConfigFormBase {
       ->set('passwd', $form_state->getValue('passwd'))
       ->set('operation', $form_state->getValue('operation'))
       ->set('user_readonly', $form_state->getValue('user_readonly'))
+      ->set('enable_cron', $form_state->getValue('enable_cron'))
+      ->set('cron_interval', $form_state->getValue('cron_interval'))
       ->save();
   }
 
