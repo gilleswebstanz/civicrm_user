@@ -2,5 +2,5 @@ civicrm_user.settings_form:
   title: 'CiviCRM User'
   route_name: civicrm_user.settings_form
   description: 'Configure filters and default values for CiviCRM contacts. Create and process queue.'
-  parent: user.admin_index
+  parent: civicrm.admin_config_civicrm
   weight: 99
