@@ -122,6 +122,7 @@ class QueuePreviewController extends ControllerBase {
       'contact_id' => $this->getContactLink($contact['id']),
       'contact_name' => $contact['sort_name'],
       'contact_email' => $contact['email'],
+      'has_update' => TRUE,
     ];
     // @todo errors and changes can be simplified.
     // Check if user exists with mail and/or name.
@@ -156,6 +157,7 @@ class QueuePreviewController extends ControllerBase {
           $this->changes[$operation]++;
         }
         else {
+          $result['has_update'] = FALSE;
           $result['drupal_status'] = $this->t('No update needed.');
         }
       }
@@ -188,7 +190,10 @@ class QueuePreviewController extends ControllerBase {
       ];
       foreach ($contacts as $contact) {
         if ($row = $this->buildRow($contact, $operation)) {
-          $build['table']['#rows'][] = $row;
+          // @todo find a more elegant way to filter unchanged updates
+          if ($row['has_update']) {
+            $build['table']['#rows'][] = $row;
+          }
         }
       }
     }
