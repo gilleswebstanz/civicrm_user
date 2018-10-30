@@ -1,5 +1,5 @@
 civicrm_user.settings_form:
-  path: '/admin/config/civicrm_user/settings'
+  path: '/admin/config/civicrm/civicrm_user/settings'
   defaults:
     _form: '\Drupal\civicrm_user\Form\SettingsForm'
     _title: 'CiviCRM User configuration'
