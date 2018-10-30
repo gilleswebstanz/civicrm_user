@@ -117,12 +117,12 @@ class QueuePreviewController extends ControllerBase {
   private function buildRow(array $contact, $operation) {
     $config = \Drupal::configFactory()->get('civicrm_user.settings');
     $domainId = $config->get('domain_id');
+    $hasUpdate = TRUE;
     // @fixme block operation returns a contact match
     $result = [
       'contact_id' => $this->getContactLink($contact['id']),
       'contact_name' => $contact['sort_name'],
       'contact_email' => $contact['email'],
-      'has_update' => TRUE,
     ];
     // @todo errors and changes can be simplified.
     // Check if user exists with mail and/or name.
@@ -157,10 +157,16 @@ class QueuePreviewController extends ControllerBase {
           $this->changes[$operation]++;
         }
         else {
-          $result['has_update'] = FALSE;
+          $hasUpdate = FALSE;
           $result['drupal_status'] = $this->t('No update needed.');
         }
       }
+    }
+
+    // Filter unchanged updates.
+    // @todo find a more elegant way to filter rows that does not need an update.
+    if (!$hasUpdate) {
+      return NULL;
     }
     return $result;
   }
@@ -190,10 +196,7 @@ class QueuePreviewController extends ControllerBase {
       ];
       foreach ($contacts as $contact) {
         if ($row = $this->buildRow($contact, $operation)) {
-          // @todo find a more elegant way to filter unchanged updates
-          if ($row['has_update']) {
-            $build['table']['#rows'][] = $row;
-          }
+          $build['table']['#rows'][] = $row;
         }
       }
     }
