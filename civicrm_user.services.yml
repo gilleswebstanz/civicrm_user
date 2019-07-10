@@ -1,7 +1,7 @@
 services:
   civicrm_user.matcher:
     class: Drupal\civicrm_user\CiviCrmUserMatcher
-    arguments: ['@civicrm_tools.api', '@entity_type.manager']
+    arguments: ['@civicrm_tools.apiv3','@civicrm_tools.apiv4', '@entity_type.manager']
   civicrm_user.creator:
     class: Drupal\civicrm_user\CiviCrmUserQueueCreator
     arguments: ['@queue', '@civicrm_user.matcher', '@state']

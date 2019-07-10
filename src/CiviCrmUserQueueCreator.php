@@ -84,15 +84,18 @@ class CiviCrmUserQueueCreator implements CiviCrmUserQueueCreatorInterface {
     $candidateMatches = $this->matcher->getCandidateMatches();
 
     // Create users that are not in the existing matches.
+    // Diff between (contacts civicrm - contacts created in drupal)
     $usersToCreate = array_diff_key($candidateMatches, $existingMatches);
     $result += $this->addItemsForOperation($queue_type, $usersToCreate, CiviCrmUserQueueItem::OPERATION_CREATE);
 
     // Block existing matches that are not candidates
     // for a user account anymore.
+    //Diff between (contacts created in drupal - contacts civicrm)
     $usersToBlock = array_diff_key($existingMatches, $candidateMatches);
     $result += $this->addItemsForOperation($queue_type, $usersToBlock, CiviCrmUserQueueItem::OPERATION_BLOCK);
 
     // Update and unblock all other existing matches.
+    // Diff between (contacts civicrm - contacts to block)
     $usersToUpdate = array_diff_key($candidateMatches, $usersToBlock);
     $result += $this->addItemsForOperation($queue_type, $usersToUpdate, CiviCrmUserQueueItem::OPERATION_UPDATE);
 

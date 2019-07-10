@@ -3,7 +3,6 @@
 namespace Drupal\civicrm_user;
 
 use Drupal\civicrm_tools\CiviCrmApiInterface;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\user\Entity\User;
 
@@ -17,12 +16,21 @@ use Drupal\user\Entity\User;
  */
 class CiviCrmUserMatcher implements CiviCrmUserMatcherInterface {
 
+  const CONTACT_FIELDS = ['id', 'contact_id', 'contact_is_deleted'];
+
   /**
    * Drupal\civicrm_tools\CiviCrmApiInterface definition.
    *
    * @var \Drupal\civicrm_tools\CiviCrmApiInterface
    */
-  protected $civicrmToolsApi;
+  protected $civicrmToolsApiV3;
+
+  /**
+   * Drupal\civicrm_tools\CiviCrmApiInterface definition.
+   *
+   * @var \Drupal\civicrm_tools\CiviCrmApiInterface
+   */
+  protected $civicrmToolsApiV4;
 
   /**
    * Drupal\Core\Entity\EntityTypeManagerInterface definition.
@@ -40,9 +48,14 @@ class CiviCrmUserMatcher implements CiviCrmUserMatcherInterface {
 
   /**
    * Constructs a new CiviCrmUserMatcher object.
+   *
+   * @param \Drupal\civicrm_tools\CiviCrmApiInterface $civicrm_tools_api_v3
+   * @param \Drupal\civicrm_tools\CiviCrmApiInterface $civicrm_tools_api_v4
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    */
-  public function __construct(CiviCrmApiInterface $civicrm_tools_api, EntityTypeManagerInterface $entity_type_manager) {
-    $this->civicrmToolsApi = $civicrm_tools_api;
+  public function __construct(CiviCrmApiInterface $civicrm_tools_api_v3, CiviCrmApiInterface $civicrm_tools_api_v4, EntityTypeManagerInterface $entity_type_manager) {
+    $this->civicrmToolsApiV3 = $civicrm_tools_api_v3;
+    $this->civicrmToolsApiV4 = $civicrm_tools_api_v4;
     $this->entityTypeManager = $entity_type_manager;
     $this->matchFilter = new CiviCrmMatchFilter();
   }
@@ -51,57 +64,43 @@ class CiviCrmUserMatcher implements CiviCrmUserMatcherInterface {
    * {@inheritdoc}
    */
   public function getExistingMatches(): array {
-    $result = [];
-    // @todo throw exception if domain id is not set
-    // @todo make use of match filter while selecting matches.
-    // @todo it should make sense to always return a civicrm contact,
-    // this will allow to simplifiy CiviCrmUserQueueItem constructor
-    // and is way more predictable.
-    // Get a connection to the CiviCRM database.
-    Database::setActiveConnection('civicrm');
-    $db = Database::getConnection();
-    // @todo check possible security issue here
-    $query = $db->query("SELECT id, uf_id, uf_name, contact_id FROM {civicrm_uf_match} WHERE domain_id = :domain_id", [
-      ':domain_id' => $this->matchFilter->getDomainId(),
-    ]);
-    $queryResult = $query->fetchAll();
-    // Switch back to the default database.
-    Database::setActiveConnection();
-    foreach ($queryResult as $row) {
-      $result[$row->contact_id] = [
-        'uid' => $row->uf_id,
-        'name' => $row->uf_name,
-        'contact_id' => $row->contact_id,
-      ];
-    }
-    return $result;
+    /** @var \Civi\Api4\Generic\Result $result */
+    // We use apiv4 here because otherwise with v3 we can't
+    // 1 : join from contact table to ufmatch table
+    // 2 : Get the contact's mail when joining from ufmatch table
+
+    $result = $this ->civicrmToolsApiV4->getDAO('Contact')::get()
+      ->addWhere("uf_matchs.domain_id", "=", $this->matchFilter->getDomainId())
+      ->setCheckPermissions(false)
+      ->setSelect(CiviCrmUserMatcher::CONTACT_FIELDS)
+      ->execute();
+    $result->indexBy('id');
+    return $result->getArrayCopy();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCandidateMatches(): array {
-    $result = [];
-    $civiCrmMatchFilter = new CiviCrmMatchFilter();
     $params = [];
-    $groups = $civiCrmMatchFilter->getGroups();
+    $groups = $this->matchFilter->getGroups();
     if (!empty($groups)) {
       $params['group'] = [
         'IN' => $groups,
       ];
     }
-    $tags = $civiCrmMatchFilter->getTags();
+    $tags = $this->matchFilter->getTags();
     if (!empty($tags)) {
       $params['tag'] = [
         'IN' => $tags,
       ];
     }
-    /** @var \Drupal\civicrm_tools\CiviCrmApiInterface $api */
-    $api = \Drupal::service('civicrm_tools.api');
-    // $candidateMatchesCount = $api->count('Contact', $params);.
+    $params['return'] = CiviCrmUserMatcher::CONTACT_FIELDS;
+
+    // @Todo : We can't use the apiv4 here yet because joining on entity_tag table is not yet supported
     // @todo due to the potentially high amount of items, use a queue worker
     // and iterate on CiviCRM api pages based on $candidateMatchesCount.
-    $result = $api->getAll('Contact', $params);
+    $result = $this ->civicrmToolsApiV3->getAll('Contact', $params);
     return $result;
   }
 

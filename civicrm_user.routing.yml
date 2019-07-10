@@ -37,3 +37,13 @@ civicrm_user.preview_queue:
     _permission: 'use civicrm user'
   options:
     _admin_route: TRUE
+
+civicrm_user.resolve_conflict:
+  path: '/admin/civicrm/civicrm_user/conflicts'
+  defaults:
+    _controller: '\Drupal\civicrm_user\Controller\ResolveConflictsController::preview'
+    _title: 'Review the conflicts between civicrm contacts and drupal users'
+  requirements:
+    _permission: 'use civicrm user'
+  options:
+    _admin_route: TRUE

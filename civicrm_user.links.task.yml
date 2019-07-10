@@ -5,6 +5,13 @@ civicrm_user.settings_form:
   description: 'Configure filters and default values for CiviCRM contacts. Create and process queue.'
   weight: 99
 
+civicrm_user.resolve_conflict:
+  title: 'Review conflicts'
+  route_name: civicrm_user.resolve_conflict
+  base_route: civicrm_user.settings_form
+  description: 'Review the conflicts between civicrm contacts and drupal users'
+  weight: 99
+
 civicrm_user.preview_queue:
   title: 'Preview queue'
   route_name: civicrm_user.preview_queue

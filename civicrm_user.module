@@ -37,7 +37,7 @@ function civicrm_user_cron() {
     // We usually don't want to act every time cron runs (which could be every
     // minute) so keep a time for the next run in the site state.
     $interval = $config->get('cron_interval');
-    $nextExecution = \Drupal::state()->get('civicrm_user_cron.next_execution');
+/*    $nextExecution = \Drupal::state()->get('civicrm_user_cron.next_execution');*/
     $nextExecution = !empty($nextExecution) ? $nextExecution : 0;
     \Drupal::messenger()->addStatus(t('Next CiviCRM contact to user processing at @date.', ['@date' => date('d/m/Y H:i:s', $nextExecution)]));
     if ((int) $_SERVER['REQUEST_TIME'] >= (int) $nextExecution) {

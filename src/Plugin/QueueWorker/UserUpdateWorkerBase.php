@@ -72,9 +72,15 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
             // @todo check here from the configuration if the user has been activated
             // if an email needs to be sent (and it should, apart from manual notification).
             $user->activate();
-            if ($user->save()) {
-              // Then update the contact match table and log operation.
-              $this->setContactMatch($user, $contact);
+            // @todo Workaround adelson
+            // Sometimes another user got created with the new email address or new username and
+            /** @var \Drupal\civicrm_user\CiviCrmUserMatcherInterface $matcher */
+            $matcher = \Drupal::service('civicrm_user.matcher');
+            if (!$matcher->userExists($this->getUsername($contact), $contact['email'])) {
+              if ($user->save()) {
+                // Then update the contact match table and log operation.
+                $this->setContactMatch($user, $contact);
+              }
             }
             else {
               \Drupal::messenger()->addError(t('User already exists. Contact id: @contact_id. User id: @user_id. *name* before: @previous_name, after: @current_name. *email* before: @previous_email, after: @current_email.', [
