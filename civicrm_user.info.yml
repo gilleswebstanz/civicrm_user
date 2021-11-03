@@ -2,6 +2,7 @@ name: 'CiviCRM User'
 type: module
 description: 'Operations on Drupal User entities based on a CiviCRM data source. Useful when the process of creating and editing users is not delegated to Drupal.'
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: 'CiviCRM'
 dependencies:
   - civicrm_tools
