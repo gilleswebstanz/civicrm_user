@@ -51,11 +51,11 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
             ]));
             $hasChanged = TRUE;
           }
-          if ($user->getUsername() !== $this->getUsername($contact)) {
+          if ($user->getDisplayName() !== $this->getUsername($contact)) {
             \Drupal::messenger()->addWarning(t('User @user_id / contact @contact_id *name* before: @previous_name, after: @current_name.', [
               '@user_id' => $user->id(),
               '@contact_id' => $contact['contact_id'],
-              '@previous_name' => $user->getUsername(),
+              '@previous_name' => $user->getDisplayName(),
               '@current_name' => $this->getUsername($contact),
             ]));
             $hasChanged = TRUE;
@@ -80,7 +80,7 @@ abstract class UserUpdateWorkerBase extends UserWorkerBase {
               \Drupal::messenger()->addError(t('User already exists. Contact id: @contact_id. User id: @user_id. *name* before: @previous_name, after: @current_name. *email* before: @previous_email, after: @current_email.', [
                 '@contact_id' => $contact['contact_id'],
                 '@user_id' => $user->id(),
-                '@previous_name' => $user->getUsername(),
+                '@previous_name' => $user->getDisplayName(),
                 '@current_name' => $this->getUsername($contact),
                 '@previous_email' => $user->getEmail(),
                 '@current_email' => $contact['email'],
