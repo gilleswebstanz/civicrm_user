@@ -181,7 +181,7 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
         $db->update($matchTable)
           ->fields([
             'uf_id' => $user->id(),
-            'uf_name' => $user->getUsername(),
+            'uf_name' => $user->getDisplayName(),
           ])
           ->condition('domain_id', $domainId)
           ->condition('contact_id', $contact['contact_id'])
@@ -200,7 +200,7 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
             [
               'domain_id' => $domainId,
               'uf_id' => $user->id(),
-              'uf_name' => $user->getUsername(),
+              'uf_name' => $user->getDisplayName(),
               'contact_id' => $contact['contact_id'],
             ]
           )
@@ -231,7 +231,7 @@ abstract class UserWorkerBase extends QueueWorkerBase implements ContainerFactor
     $fields = [
       'uid' => (int) $user->id(),
       'contact_id' => (int) $contact['contact_id'],
-      'user_name' => (string) $user->getUsername(),
+      'user_name' => (string) $user->getDisplayName(),
       'user_mail' => (string) $user->getEmail(),
       'operation' => (string) $operation,
       'timestamp' => \Drupal::time()->getRequestTime(),
