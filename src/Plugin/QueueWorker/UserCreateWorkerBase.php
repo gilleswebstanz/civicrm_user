@@ -73,7 +73,7 @@ abstract class UserCreateWorkerBase extends UserWorkerBase {
         $password = $config->get('passwd');
       }
       else {
-        $password = user_password();
+        $password = \Drupal::service('password_generator')->generate();
       }
 
       /** @var \Drupal\user\Entity\User $user */
